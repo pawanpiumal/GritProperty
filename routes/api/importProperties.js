@@ -1,26 +1,29 @@
 const express = require("express")
 var convert = require('xml-js');
 const axios = require('axios')
+const fs = require('fs')
+const https = require('http')
+const FormData = require('form-data')
 
-
+const errorSQL = require('../../middleware/db').errorSQL
 const router = express.Router()
 
-const timeSplitString = (value,type) => {
-    if(type=="date"){
+const timeSplitString = (value, type) => {
+    if (type == "date") {
         return value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8);
-    }else if(type=="datetime"){
+    } else if (type == "datetime") {
         return value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8) + "T" + value.slice(9, 11) + ":" + value.slice(11, 13);
-    }else{
+    } else {
         return value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8) + "T" + value.slice(9, 11) + ":" + value.slice(11, 13) + ":" + value.slice(13, 15);
     }
-    
+
 }
 
 const getText = (value) => {
-    if(typeof value == "string"){
-        if(value == undefined){
+    if (typeof value == "string") {
+        if (value == undefined) {
             return ""
-        }else{
+        } else {
             return value
         };
     }
@@ -31,7 +34,81 @@ const getText = (value) => {
     return "";
 }
 
-router.get('/', (req, res) => {
+// https://stackoverflow.com/questions/55374755/node-js-axios-download-file-stream-and-writefile
+const downloadFile = async(fileUrl, filename) => {
+    // var fileExt = url.split('.').pop()
+    // const file = fs.createWriteStream('downloads/'+filename+'.'+fileExt);
+    // var filename = fileUrl.split('/').pop()
+    const writer = fs.createWriteStream('downloads/' + filename);
+
+    return axios.request({
+        method: 'get',
+        url: fileUrl,
+        responseType: 'stream',
+    }).then(response => {
+
+        //ensure that the user can call `then()` only when the file has
+        //been downloaded entirely.
+
+        return new Promise((resolve, reject) => {
+            response.data.pipe(writer);
+            let error = null;
+            writer.on('error', err => {
+                error = err;
+                writer.close();
+                reject(err);
+            });
+            writer.on('close', () => {
+                if (!error) {
+                    resolve(true);
+                }
+                //no need to call the reject here, as it will have been called in the
+                //'error' stream;
+            });
+        });
+    });
+}
+
+const uploadFile = async(filename) => {
+    const reader = await fs.createReadStream('downloads/' + filename);
+
+    // await axios.request({
+    //     method:'post',
+    //     url:"https://charming-beaver.13-211-217-84.plesk.page/wp-json/wp/v2/media",
+    //     headers:{
+    //         "Content-Disposition":`attachment; filename="${filename}"`,
+    //         "Authorization":"Basic ***REMOVED***",
+    //         "Content-Type": `image/jpeg`,
+    //         "Accept":"*/*",
+    //         "Accept-Encoding":'gzip, deflate, br'
+
+    //     },
+    //     data:Buffer.from('downloads/' + filename)
+    // }).then(response=>{
+    //     // console.log(response)
+    //     return response
+    // }).catch(err=>{
+    //     errorSQL("UploadFile",err)
+    //     console.error(err)
+    // })
+    const form = new FormData();
+    form.append('file', reader);
+
+    const request_config = {
+        headers: {
+            "Content-Disposition": `attachment; filename="${filename}"`,
+            'Authorization': `Basic ***REMOVED***`,
+            "Content-Type": `image/jpeg`,
+            ...form.getHeaders()
+        }
+    };
+    axios.post('https://charming-beaver.13-211-217-84.plesk.page/wp-json/wp/v2/media', form, request_config).catch(err=>{
+        console.error(err)
+    })
+}
+
+uploadFile('131379830-image-M.jpg')
+router.get('/', async(req, res) => {
     // console.log({ req })
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
 
@@ -42,7 +119,10 @@ router.get('/', (req, res) => {
     } else {
         reqStatus = "draft"
     }
-    
+
+    downloadFile(getText(result.media.attachment._attributes.url))
+    await downloadFile(getText(result.objects.img[0]._attributes.url))
+
     itemResidential = {
         "title": {
             "raw": getText(result.headline)
@@ -57,7 +137,7 @@ router.get('/', (req, res) => {
             "status": getText(result._attributes.status),
             "sale-price": getText(result.soldDetails.soldPrice),
             "show_sale_price": getText(result.soldDetails.soldPrice._attributes.display),
-            "sale-date": timeSplitString(getText(result.soldDetails.soldDate),"date"),
+            "sale-date": timeSplitString(getText(result.soldDetails.soldDate), "date"),
             "ishomelandpackage": getText(result.isHomeLandPackage._attributes.value),
             "category-resi": getText(result.category._attributes.name),
             "new-or-established-nopackage": getText(result.newConstruction) == 0 ? "false" : "true",
@@ -68,7 +148,7 @@ router.get('/', (req, res) => {
             "auction-date": "",
             "set-sale-date": "",
             "price": getText(result.price),
-            "price-display": getText(result.priceView) != ""? "yes_" : getText(result.price._attributes.display),
+            "price-display": getText(result.priceView) != "" ? "yes_" : getText(result.price._attributes.display),
             "priceview": getText(result.priceView),
             "vendor-name": "",
             "vendor-email": "",
@@ -171,7 +251,7 @@ router.get('/', (req, res) => {
 
 
 
-    res.status(200).json({itemResidential })
+    res.status(200).json({ result, itemResidential })
 })
 
 
@@ -193,6 +273,10 @@ router.get('/', (req, res) => {
 
 // });
 
+router.post("/as", (req, res) => {
+    console.log(req)
+    res.status(200).json({ s: "2" })
+})
 
 
 module.exports = router;
