@@ -1,0 +1,1 @@
+{"code":"ER_DB_CREATE_EXISTS","errno":1007,"sqlMessage":"Can't create database 'gritproperty'; database exists","sqlState":"HY000","index":0,"sql":"CREATE DATABASE  gritProperty"}

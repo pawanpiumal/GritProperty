@@ -1,0 +1,1 @@
+{"code":"ER_TABLE_EXISTS_ERROR","errno":1050,"sqlMessage":"Table 'errors' already exists","sqlState":"42S01","index":0,"sql":"CREATE TABLE `gritproperty`.`errors` (    `id` INT NOT NULL AUTO_INCREMENT,    `error` TEXT NOT NULL,    `time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,    PRIMARY KEY (`id`),    UNIQUE INDEX `Time_UNIQUE` (`time` ASC) VISIBLE);"}

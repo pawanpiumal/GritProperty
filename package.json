@@ -1,0 +1,22 @@
+{
+  "name": "grit-property.syntara-solutions",
+  "version": "1.0.0",
+  "description": "Application to process REAXML files for Grit Property Group website.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node .\\app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app"
+  },
+  "author": "Syntara Solutions",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.5",
+    "body-parser": "^1.20.1",
+    "express": "^4.18.2",
+    "express-xml-bodyparser": "^0.3.0",
+    "mysql": "^2.18.1",
+    "nodemon": "^3.0.2",
+    "xml-js": "^1.6.11"
+  }
+}
