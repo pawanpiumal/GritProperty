@@ -102,12 +102,12 @@ const uploadFile = async(filename) => {
             ...form.getHeaders()
         }
     };
-    axios.post('https://charming-beaver.13-211-217-84.plesk.page/wp-json/wp/v2/media', form, request_config).catch(err=>{
+    axios.post('https://charming-beaver.13-211-217-84.plesk.page/wp-json/wp/v2/media', form, request_config).catch(err => {
         console.error(err)
     })
 }
 
-uploadFile('131379830-image-M.jpg')
+// uploadFile('131379830-image-M.jpg')
 router.get('/', async(req, res) => {
     // console.log({ req })
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
@@ -120,8 +120,8 @@ router.get('/', async(req, res) => {
         reqStatus = "draft"
     }
 
-    downloadFile(getText(result.media.attachment._attributes.url))
-    await downloadFile(getText(result.objects.img[0]._attributes.url))
+    // downloadFile(getText(result.media.attachment._attributes.url))
+    // await downloadFile(getText(result.objects.img[0]._attributes.url))
 
     itemResidential = {
         "title": {
@@ -254,6 +254,128 @@ router.get('/', async(req, res) => {
     res.status(200).json({ result, itemResidential })
 })
 
+router.get('/rental', (req, res) => {
+    // console.log({ req })
+    var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
+
+    result = result.rental
+    if (req.query == "publish" || req.query == "draft") {
+        reqStatus = req.query
+    } else {
+        reqStatus = "draft"
+    }
+
+
+    itemRental = {
+        "title": {
+            "raw": getText(result.headline)
+        },
+        "status": reqStatus,
+        "meta": {
+            "uniqueid": "",
+            "agentid": "KKDIXI",
+            "new-or-old-post": "New",
+            "status": "current",
+            "leased-date": "",
+            "category-rental": "House",
+            "new-or-established-rental-nopackage": "false",
+            "lead-agent": "842",
+            "dual-agent": "843",
+            "rental-per-week": "1",
+            "rental-per-calendar-month": "1",
+            "security-bond": "1",
+            "price-display": "Show Actual price",
+            "price-text": "",
+            "date-available": "2024-01-09",
+            "subnumber": "",
+            "streetnumber-rr": "1",
+            "street-rr": "sad",
+            "suburbstatepostcode": "CALWELL - ACT - 2905",
+            "municipality": "",
+            "streetview": "yes",
+            "display_address": "yes",
+            "bedrooms-rental-nostu": "1",
+            "bedrooms-rr-studio": "Studio",
+            "bathrooms-rr": "1",
+            "ensuite": "",
+            "toilets": "",
+            "garages": "",
+            "car": "",
+            "livingarea": "",
+            "house-size": "",
+            "house-size-unit": "square",
+            "land-size": "",
+            "land-size-unit": "square",
+            "energy-efficiency-rating": "",
+            "allowances": {
+                "Furnished": "true",
+                "Pet Friendly": "false",
+                "Smokers": "false"
+            },
+            "outdoor-features": {
+                "Balcony": "false",
+                "Courtyard": "false",
+                "Deck": "false",
+                "Fully Fenced": "false",
+                "Outdoor Entertainment Area": "false",
+                "Outside Spa": "false",
+                "Remote Garage": "false",
+                "Secure Parking": "false",
+                "Shed": "false",
+                "Swimming Pool - Above Ground": "false",
+                "Swimming Pool - In Ground": "false",
+                "Tennis Court": "false"
+            },
+            "indoor-features": {
+                "Alarm System": "false",
+                "Broadband Internet Available": "false",
+                "Built-in Wardrobes": "false",
+                "Dishwasher": "false",
+                "Ducted Vacuum System": "false",
+                "Floorboards": "false",
+                "Gym": "false",
+                "Inside Spa": "false",
+                "Intercom": "false",
+                "Pay TV Access": "false",
+                "Rumpus Room": "false",
+                "Study": "false",
+                "Workshop": "false"
+            },
+            "heating--cooling": {
+                "Air Conditioning": "false",
+                "Ducted Cooling": "false",
+                "Ducted Heating": "false",
+                "Evaporative Cooling": "false",
+                "Gas Heating": "false",
+                "Hydronic Heating": "false",
+                "Open Fireplace": "false",
+                "Reverse Cycle Air Conditioning": "false",
+                "Split-System Air Conditioning": "false",
+                "Split-System Heating": "false"
+            },
+            "eco-friendly-features": {
+                "Grey Water System": "false",
+                "Solar Hot Water": "false",
+                "Solar Panels": "false",
+                "Water Tank": "false"
+            },
+            "headline": "Proeperty",
+            "_description": "sDasdasd",
+            "property-images": [],
+            "floorplans": "",
+            "floorplans-2": "",
+            "statement-of-information": "",
+            "front-page-image": "",
+            "video-url": "http://",
+            "online-tour-1": "http://",
+            "online-tour-2": "http://"
+        }
+    }
+
+
+
+    res.status(200).json({ result })
+})
 
 // router.get('/', (req, res) => {
 //     var axios = require('axios')
