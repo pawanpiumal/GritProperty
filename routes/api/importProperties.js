@@ -7,6 +7,7 @@ const FormData = require('form-data')
 
 const errorSQL = require('../../middleware/db').errorSQL
 const router = express.Router()
+const config = require('../../config/keys')
 
 const timeSplitString = (value, type) => {
     if (type == "date") {
@@ -72,56 +73,56 @@ const downloadFile = async(fileUrl, filename) => {
 const uploadFile = async(filename) => {
     const reader = await fs.createReadStream('downloads/' + filename);
 
-    // await axios.request({
-    //     method:'post',
-    //     url:"https://charming-beaver.13-211-217-84.plesk.page/wp-json/wp/v2/media",
-    //     headers:{
-    //         "Content-Disposition":`attachment; filename="${filename}"`,
-    //         "Authorization":"Basic ***REMOVED***",
-    //         "Content-Type": `image/jpeg`,
-    //         "Accept":"*/*",
-    //         "Accept-Encoding":'gzip, deflate, br'
-
-    //     },
-    //     data:Buffer.from('downloads/' + filename)
-    // }).then(response=>{
-    //     // console.log(response)
-    //     return response
-    // }).catch(err=>{
-    //     errorSQL("UploadFile",err)
-    //     console.error(err)
-    // })
     const form = new FormData();
     form.append('file', reader);
 
     const request_config = {
         headers: {
             "Content-Disposition": `attachment; filename="${filename}"`,
-            'Authorization': `Basic ***REMOVED***`,
-            "Content-Type": `image/jpeg`,
+            'Authorization': `Basic ${config.WPAuthorization}`,
             ...form.getHeaders()
         }
     };
-    axios.post('https://charming-beaver.13-211-217-84.plesk.page/wp-json/wp/v2/media', form, request_config).catch(err => {
+    await axios.postForm(`${config.WPmediaURL}`, form, request_config).then(res => {
+        fileid = res.data.id
+            // console.log({fileid})
+    }).catch(err => {
         console.error(err)
+        errorSQL("Upload Image to WP", err)
+    })
+    return (fileid)
+}
+
+const deleteFile = (filename) => {
+    fs.rename('downloads/' + filename, 'downloads/trash/' + filename, err => {
+        errorSQL("Move file to trash", err)
     })
 }
 
-// uploadFile('131379830-image-M.jpg')
-router.get('/', async(req, res) => {
-    // console.log({ req })
+const fileOperation = async(url) => {
+    var filename = url.split('/').pop()
+    await downloadFile(url, filename)
+    var fileId = await uploadFile(filename)
+    deleteFile(filename)
+        // console.log({fileId})
+    return fileId;
+}
+
+router.post('/', async(req, res) => {
+
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
 
     result = result.residential
-        // console.log(result.residential)
     if (req.query == "publish" || req.query == "draft") {
         reqStatus = req.query
     } else {
         reqStatus = "draft"
     }
 
-    // downloadFile(getText(result.media.attachment._attributes.url))
-    // await downloadFile(getText(result.objects.img[0]._attributes.url))
+    var imagesArray = await Promise.all(result.objects.img.map(async element => {
+        var id = await fileOperation(element._attributes.url)
+        return { id }
+    }))
 
     itemResidential = {
         "title": {
@@ -227,18 +228,7 @@ router.get('/', async(req, res) => {
             "other-features": getText(result.features.otherFeatures),
             "headline": getText(result.headline),
             "description_property": getText(result.description),
-            "property-images": [{
-                    "id": 898
-                },
-                {
-                    "id": 727,
-                    "url": "https://charming-beaver.13-211-217-84.plesk.page/wp-content/uploads/2023/09/08-08-2023-FB-Flyer-Sydney-03-1.jpg"
-                },
-                {
-                    "id": 723,
-                    "url": "https://charming-beaver.13-211-217-84.plesk.page/wp-content/uploads/2023/04/cropped-android-chrome-512x512-1.png"
-                }
-            ],
+            "property-images": imagesArray,
             "floorplans": "",
             "floorplans-2": "",
             "statement-of-information": "",
@@ -249,9 +239,28 @@ router.get('/', async(req, res) => {
         }
     }
 
+    let data = JSON.stringify(itemResidential);
 
+    let configReq = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: `${config.WPResidentialHouse}`,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${config.WPAuthorization}`
+        },
+        data: data
+    };
 
-    res.status(200).json({ result, itemResidential })
+    axios.request(configReq)
+        .then((response) => {
+            console.log(JSON.stringify(response.data));
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+
+    res.status(200).json({ itemResidential })
 })
 
 router.get('/rental', (req, res) => {

@@ -3,6 +3,7 @@ const express = require('express')
 const bodyParser = require("body-parser");
 const mysql = require('mysql')
 const xmlparser = require('express-xml-bodyparser');
+const cors = require('cors')
 
 // Function to write errors to text files
 const errorFile = require('./middleware/functions').errorFile
@@ -16,6 +17,8 @@ const postProperty = require('./routes/api/importProperties')
 // middleware
 app.use(bodyParser.json())
 app.use(xmlparser())
+
+app.use(cors())
 
 // Create mySQL Connection
 const db = require('./config/keys');
