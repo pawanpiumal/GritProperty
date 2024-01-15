@@ -18,7 +18,6 @@ const postProperty = require('./routes/api/importProperties')
 app.use(bodyParser.json())
 app.use(xmlparser())
 
-app.use(cors())
 
 // Create mySQL Connection
 const db = require('./config/keys');

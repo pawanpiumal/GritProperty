@@ -9,6 +9,7 @@ const errorSQL = require('../../middleware/db').errorSQL
 const router = express.Router()
 const config = require('../../config/keys')
 
+
 const timeSplitString = (value, type) => {
     if (type == "date") {
         return value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8);
@@ -108,6 +109,37 @@ const fileOperation = async(url) => {
     return fileId;
 }
 
+const checkList = async(type, uniqueidToCheck) => {
+    var url = config.WPmainURL + type+'?status=any'
+
+    listRes = await axios.get(url,{
+        headers:{
+            "Authorization":`basic ${config.WPAuthorization}`
+        }
+    }).catch(err => {
+        errorSQL("Checking List of Posts", err)
+    })
+    var postList = listRes.data.map(element => {
+        return {
+            id: element.id,
+            uniqueid: element.meta.uniqueid
+        }
+    })
+    // console.log(postList)
+    var postId = ""
+    for (let index = 0; index < postList.length; index++) {
+        const element = postList[index];
+
+        if (element.uniqueid == uniqueidToCheck) {
+            postId = element.id
+            break
+        }
+    }
+    // console.log(postId);
+    return (postId);
+}
+
+
 router.post('/', async(req, res) => {
 
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
@@ -120,9 +152,14 @@ router.post('/', async(req, res) => {
     }
 
     var imagesArray = await Promise.all(result.objects.img.map(async element => {
-        var id = await fileOperation(element._attributes.url)
+        var id = await fileOperation(getText(element._attributes.url))
         return { id }
     }))
+
+    var statementOfInformationID = await fileOperation(getText(result.media.attachment._attributes.url))
+
+    // var imagesArray = []
+    // var statementOfInformationID = ""
 
     itemResidential = {
         "title": {
@@ -231,7 +268,7 @@ router.post('/', async(req, res) => {
             "property-images": imagesArray,
             "floorplans": "",
             "floorplans-2": "",
-            "statement-of-information": "",
+            "statement-of-information": [{ id: statementOfInformationID }],
             "front-page-image": "",
             "videolink": "http://",
             "online-tour-1": "http://",
@@ -240,11 +277,14 @@ router.post('/', async(req, res) => {
     }
 
     let data = JSON.stringify(itemResidential);
-
+    let postId = await checkList("residential_home", itemResidential.meta.uniqueid)
+    // console.log(postId);
+    let restURL = `${config.WPmainURL}residential_home/${postId != "" ? postId : ""}`
+    // console.log(restURL);
     let configReq = {
         method: 'post',
         maxBodyLength: Infinity,
-        url: `${config.WPResidentialHouse}`,
+        url: restURL,
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Basic ${config.WPAuthorization}`
@@ -254,13 +294,13 @@ router.post('/', async(req, res) => {
 
     axios.request(configReq)
         .then((response) => {
-            console.log(JSON.stringify(response.data));
+            // console.log(JSON.stringify(response.data));
         })
         .catch((error) => {
-            console.log(error);
+            errorSQL("Upload Property", error)
         });
 
-    res.status(200).json({ itemResidential })
+    res.status(200).json({ result, itemResidential })
 })
 
 router.get('/rental', (req, res) => {
