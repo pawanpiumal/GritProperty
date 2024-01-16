@@ -110,22 +110,22 @@ const fileOperation = async(url) => {
 }
 
 const checkList = async(type, uniqueidToCheck) => {
-    var url = config.WPmainURL + type+'?status=any'
+    var url = config.WPmainURL + type + '?status=any'
 
-    listRes = await axios.get(url,{
-        headers:{
-            "Authorization":`basic ${config.WPAuthorization}`
+    listRes = await axios.get(url, {
+        headers: {
+            "Authorization": `basic ${config.WPAuthorization}`
         }
     }).catch(err => {
         errorSQL("Checking List of Posts", err)
     })
     var postList = listRes.data.map(element => {
-        return {
-            id: element.id,
-            uniqueid: element.meta.uniqueid
-        }
-    })
-    // console.log(postList)
+            return {
+                id: element.id,
+                uniqueid: element.meta.uniqueid
+            }
+        })
+        // console.log(postList)
     var postId = ""
     for (let index = 0; index < postList.length; index++) {
         const element = postList[index];
@@ -151,16 +151,15 @@ router.post('/', async(req, res) => {
         reqStatus = "draft"
     }
 
-    var imagesArray = await Promise.all(result.objects.img.map(async element => {
-        var id = await fileOperation(getText(element._attributes.url))
-        return { id }
-    }))
+    // var imagesArray = await Promise.all(result.objects.img.map(async element => {
+    //     var id = await fileOperation(getText(element._attributes.url))
+    //     return { id }
+    // }))
 
-    var statementOfInformationID = await fileOperation(getText(result.media.attachment._attributes.url))
+    // var statementOfInformationID = await fileOperation(getText(result.media.attachment._attributes.url))
 
-    // var imagesArray = []
-    // var statementOfInformationID = ""
-
+    var imagesArray = []
+    var statementOfInformationID = ""
     itemResidential = {
         "title": {
             "raw": getText(result.headline)
@@ -172,7 +171,7 @@ router.post('/', async(req, res) => {
             "agentid": getText(result.agentID),
             "listing-id": getText(result.listingId),
             "new-or-old-post": "Old",
-            "status": getText(result._attributes.status),
+            "status": getText(result.underOffer._attributes.value) == "no" ? getText(result._attributes.status) : "Under Offer",
             "sale-price": getText(result.soldDetails.soldPrice),
             "show_sale_price": getText(result.soldDetails.soldPrice._attributes.display),
             "sale-date": timeSplitString(getText(result.soldDetails.soldDate), "date"),
@@ -278,9 +277,9 @@ router.post('/', async(req, res) => {
 
     let data = JSON.stringify(itemResidential);
     let postId = await checkList("residential_home", itemResidential.meta.uniqueid)
-    // console.log(postId);
+        // console.log(postId);
     let restURL = `${config.WPmainURL}residential_home/${postId != "" ? postId : ""}`
-    // console.log(restURL);
+        // console.log(restURL);
     let configReq = {
         method: 'post',
         maxBodyLength: Infinity,
