@@ -42,29 +42,52 @@ const isEmptyJson = (json) => {
 }
 
 var imageDatabase = []
-const updateImageDatabase = async ()=>{
-    var url = config.WPmediaURL
+const updateImageDatabase = async () => {
+    var url = `${config.WPmediaURL}/?per_page=100`
 
-    listRes = await axios.get(url).catch(err => {
-        errorSQL("Checking List of Media", err)
-    })
-
-    listRes.data.map(element => {
-            file = {
+    var fileList = []
+    var max_pages = 5
+    var breakLoop = false;
+    for (let index = 1; index < max_pages; index++) {
+        var listRes = await axios.get(`${url}&page=${index}`).catch(err => {
+            if (err.response.data.code == "rest_post_invalid_page_number") {
+                breakLoop = true
+                max_pages = index
+            }
+            errorSQL("Checking List of Media", err)
+        })
+        if (breakLoop) { break; }
+        listRes.data.map(element => {
+            var file = {
                 id: element.id,
                 original_image_name: element.media_details.original_image
             }
-        
-    })
-}
-const checkAvailabilityFile = async (filename) => {
-    
+            fileList.push(file)
+        })
 
-    // console.log(file);
+
+    }
+    imageDatabase = fileList
+}
+
+updateImageDatabase()
+
+const checkAvailabilityFile = async (filename) => {
+    var url = `${config.WPmediaURL}`
+    var file = {}
+    for (let index = 0; index < imageDatabase.length; index++) {
+        const element = imageDatabase[index];
+        if (element.original_image_name == filename) {
+            file = element
+            console.log({file});
+            break;
+        }
+    }
+
     if (!isEmptyJson(file)) {
         var deleteURL = `${url}/${file.id}?force=true`
         // console.log(deleteURL);
-        axios.delete(deleteURL, {
+        await axios.delete(deleteURL, {
             headers: {
                 'Authorization': `Basic ${config.WPAuthorization}`
             }
@@ -146,6 +169,7 @@ const fileOperation = async (url) => {
     await downloadFile(url, filename)
     var fileId = await uploadFile(filename)
     deleteFile(filename)
+    updateImageDatabase()
     // console.log({fileId})
     return fileId;
 }
