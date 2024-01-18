@@ -23,21 +23,23 @@ app.use(xmlparser())
 const db = require('./config/keys');
 
 var connection = mysql.createConnection({
-    host: db.host,
+    port:db.port,
     user: db.username,
-    password: db.password
+    password: db.password,
+    host:db.host,
 });
 
 connection.connect(function(err) {
     if (err) {
         console.error('error connecting: ' + err.stack);
+        errorFile(err)
         return;
     }
     console.log('connected as id ' + connection.threadId);
 });
 
 connection.query(`CREATE DATABASE IF NOT EXISTS ${db.db}`, (error, results, fields) => {
-    if (error) errorFile(JSON.stringify(error))
+    if (error) errorFile(error)
 })
 
 connection.changeUser({ database: db.db }, (err) => {
@@ -61,6 +63,10 @@ connection.query('CREATE TABLE IF NOT EXISTS errors (\
 connection.end()
 
 app.use("/api/postproperty", postProperty)
+
+app.get('/',(req,res)=>{
+    res.status(200).json({msg:"working"})
+})
 
 app.listen(port, () => {
     console.log(`App started on port ${port}`)

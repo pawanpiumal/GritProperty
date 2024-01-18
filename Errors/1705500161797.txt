@@ -1,0 +1,1 @@
+Error: ER_DBACCESS_DENIED_ERROR: Access denied for user 'grit_au_user'@'%' to database 'grit_porperty'

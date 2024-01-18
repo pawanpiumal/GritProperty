@@ -36,8 +36,48 @@ const getText = (value) => {
     return "";
 }
 
+const isEmptyJson = (json) => {
+    for (var i in json) return false;
+    return true;
+}
+
+var imageDatabase = []
+const updateImageDatabase = async ()=>{
+    var url = config.WPmediaURL
+
+    listRes = await axios.get(url).catch(err => {
+        errorSQL("Checking List of Media", err)
+    })
+
+    listRes.data.map(element => {
+            file = {
+                id: element.id,
+                original_image_name: element.media_details.original_image
+            }
+        
+    })
+}
+const checkAvailabilityFile = async (filename) => {
+    
+
+    // console.log(file);
+    if (!isEmptyJson(file)) {
+        var deleteURL = `${url}/${file.id}?force=true`
+        // console.log(deleteURL);
+        axios.delete(deleteURL, {
+            headers: {
+                'Authorization': `Basic ${config.WPAuthorization}`
+            }
+        }).catch(err2 => {
+            errorSQL("Delete existing media", err2)
+            // console.log(err2)
+        })
+    }
+}
+
+
 // https://stackoverflow.com/questions/55374755/node-js-axios-download-file-stream-and-writefile
-const downloadFile = async(fileUrl, filename) => {
+const downloadFile = async (fileUrl, filename) => {
     // var fileExt = url.split('.').pop()
     // const file = fs.createWriteStream('downloads/'+filename+'.'+fileExt);
     // var filename = fileUrl.split('/').pop()
@@ -71,7 +111,7 @@ const downloadFile = async(fileUrl, filename) => {
     });
 }
 
-const uploadFile = async(filename) => {
+const uploadFile = async (filename) => {
     const reader = await fs.createReadStream('downloads/' + filename);
 
     const form = new FormData();
@@ -86,7 +126,7 @@ const uploadFile = async(filename) => {
     };
     await axios.postForm(`${config.WPmediaURL}`, form, request_config).then(res => {
         fileid = res.data.id
-            // console.log({fileid})
+        // console.log({fileid})
     }).catch(err => {
         console.error(err)
         errorSQL("Upload Image to WP", err)
@@ -100,16 +140,17 @@ const deleteFile = (filename) => {
     })
 }
 
-const fileOperation = async(url) => {
+const fileOperation = async (url) => {
     var filename = url.split('/').pop()
+    await checkAvailabilityFile(filename)
     await downloadFile(url, filename)
     var fileId = await uploadFile(filename)
     deleteFile(filename)
-        // console.log({fileId})
+    // console.log({fileId})
     return fileId;
 }
 
-const checkList = async(type, uniqueidToCheck) => {
+const checkList = async (type, uniqueidToCheck) => {
     var url = config.WPmainURL + type + '?status=any'
 
     listRes = await axios.get(url, {
@@ -120,12 +161,12 @@ const checkList = async(type, uniqueidToCheck) => {
         errorSQL("Checking List of Posts", err)
     })
     var postList = listRes.data.map(element => {
-            return {
-                id: element.id,
-                uniqueid: element.meta.uniqueid
-            }
-        })
-        // console.log(postList)
+        return {
+            id: element.id,
+            uniqueid: element.meta.uniqueid
+        }
+    })
+    // console.log(postList)
     var postId = ""
     for (let index = 0; index < postList.length; index++) {
         const element = postList[index];
@@ -140,7 +181,7 @@ const checkList = async(type, uniqueidToCheck) => {
 }
 
 
-router.post('/', async(req, res) => {
+router.post('/', async (req, res) => {
 
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
 
@@ -151,15 +192,16 @@ router.post('/', async(req, res) => {
         reqStatus = "draft"
     }
 
-    // var imagesArray = await Promise.all(result.objects.img.map(async element => {
-    //     var id = await fileOperation(getText(element._attributes.url))
-    //     return { id }
-    // }))
+    var imagesArray = await Promise.all(result.objects.img.map(async element => {
+        var id = await fileOperation(getText(element._attributes.url))
+        return { id }
+    }))
 
-    // var statementOfInformationID = await fileOperation(getText(result.media.attachment._attributes.url))
+    var statementOfInformationID = await fileOperation(getText(result.media.attachment._attributes.url))
 
-    var imagesArray = []
-    var statementOfInformationID = ""
+    // var imagesArray = []
+    // var statementOfInformationID = ""
+
     itemResidential = {
         "title": {
             "raw": getText(result.headline)
@@ -277,9 +319,9 @@ router.post('/', async(req, res) => {
 
     let data = JSON.stringify(itemResidential);
     let postId = await checkList("residential_home", itemResidential.meta.uniqueid)
-        // console.log(postId);
+    // console.log(postId);
     let restURL = `${config.WPmainURL}residential_home/${postId != "" ? postId : ""}`
-        // console.log(restURL);
+    // console.log(restURL);
     let configReq = {
         method: 'post',
         maxBodyLength: Infinity,

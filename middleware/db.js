@@ -6,15 +6,15 @@ const errorFile = require('./functions').errorFile
 // Create mySQL Connection
 const db = require('../config/keys');
 
-var connection = mysql.createConnection({
-    host: db.host,
-    user: db.username,
-    password: db.password,
-    database: db.db
-});
-
-
 const errorSQL = function(place, error) {
+    var connection = mysql.createConnection({
+        port:db.port,
+        user: db.username,
+        password: db.password,
+        host:db.host,
+        database:db.db
+    });
+    
     if (place && error) {
         connection.connect(function(err) {
             if (err) {
@@ -31,4 +31,4 @@ const errorSQL = function(place, error) {
         connection.end()
     }
 }
-module.exports = { connection, errorSQL }
+module.exports = {errorSQL }
