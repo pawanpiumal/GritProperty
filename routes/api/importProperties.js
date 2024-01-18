@@ -56,7 +56,7 @@ const updateImageDatabase = async () => {
     var breakLoop = false;
     for (let index = 1; index < max_pages; index++) {
         var listRes = await axios.get(`${url}&page=${index}`).catch(err => {
-            if (err.response.data.code != "rest_post_invalid_page_number") {
+            if (err.response?.data?.code != "rest_post_invalid_page_number") {
                 errorSQL("Checking List of Media", err)
             }
             breakLoop = true
@@ -150,7 +150,7 @@ const uploadFile = async (filename) => {
         headers: {
             "Content-Disposition": `attachment; filename="${filename}"`,
             'Authorization': `Basic ${config.WPAuthorization}`,
-            ...form.getHeaders()
+            // ...form.getHeaders()
         }
     };
     await axios.postForm(`${config.WPmediaURL}`, form, request_config).then(res => {
@@ -198,10 +198,9 @@ const checkList = async (type, uniqueidToCheck) => {
             }
         }).catch(err => {
             if (err.response.data.code != "rest_post_invalid_page_number") {
-                errorSQL("Checking List of Media", err)
+                errorSQL("Checking List of Posts", err)
             }
             breakLoop = true
-            errorSQL("Checking List of Posts", err)
         })
 
         if (breakLoop) { break }
@@ -232,6 +231,56 @@ const checkList = async (type, uniqueidToCheck) => {
     return (postId);
 }
 
+const CreateAgent = async (Agent) => {
+
+    var url = `${config.WPmainURL}agent/?status=any&per_page=100&`
+    var agentList = []
+
+    var max_pages = 2
+    var breakLoop = false
+    for (let index = 1; index < max_pages; index++) {
+        await axios.get(`${url}page=${index}`, {
+            headers: {
+                authorization: `basic ${config.WPAuthorization}`
+            }
+        }).then(res => {
+            res.data.forEach(e => {
+                agentList.push({
+                    id: e.id,
+                    unique: e.meta.uniquelistingagentid
+                })
+            })
+        }).catch(err => {
+            if (err.response.data.code != "rest_post_invalid_page_number") {
+                errorSQL("Checking List of Posts", err)
+            }
+            breakLoop = true
+        })
+        if (breakLoop) { break }
+        if (index == 1 && agentList.length == 0) { break }
+        max_pages = max_pages + 1
+    }
+
+    var unique = getText(Agent.uniquelistingagentid)
+    // var name = getText(Agent.name)
+    // var telephone = getText(Agent.telephone)
+    // var email = getText(Agent.email)
+    // var twitter = getText(Agent.twitterURL)
+    // var facebook = getText(Agent.facebookURL)
+    // var linkedIn = getText(Agent.linkedInURL)
+    // var media = getText(Agent.media?.attachment?._attributes?.url)
+    
+    var AgentID = ""
+    agentList.forEach(e=>{
+        if(e.unique==unique){
+            AgentID = e.id
+        }
+    })
+    if(AgentID != ""){return AgentID}
+
+}
+
+// CreateAgent()
 
 router.post('/', async (req, res) => {
 
@@ -360,7 +409,7 @@ router.post('/', async (req, res) => {
             "municipality": getText(result.municipality),
             "streetview": getText(result.address?._attributes?.streetview),
             "display_address": getText(result.address?._attributes?.display),
-            
+
             "auction-result": getText(result.auctionOutcome?.auctionResult?._attributes?.type),
             "auction-date_prior": getText(result.auctionOutcome?.auctionDate),
             "maximum-bid": getText(result.auctionOutcome?.auctionMaxBid?._attributes?.value),
@@ -380,7 +429,16 @@ router.post('/', async (req, res) => {
             "land-size": getText(result.landDetails?.area),
             "land-size-unit": getText(result.landDetails?.area?._attributes?.unit),
             "energy-efficiency-rating": getText(result.buildingDetails?.energyRating),
-            
+
+            "land-size-sqm": getText(result.landDetails?.area),
+            "cross-over": getText(result.landDetails?.crossOver?._attributes?.value),
+            "frontage-m": getText(result.landDetails?.frontage),
+
+            "rear-depth-m": getText(result.landDetails?.depth?.filter(e => e._attributes?.side == 'rear')[0]),
+            "right-depth-m": getText(result.landDetails?.depth?.filter(e => e._attributes?.side == 'right')[0]),
+            "left-depth-m": getText(result.landDetails?.depth?.filter(e => e._attributes?.side == 'left')[0]),
+
+
             "allowances": {
                 "Furnished": getText(result.allowances?.furnished),
                 "Pet Friendly": getText(result.allowances?.petFriendly),
@@ -443,7 +501,7 @@ router.post('/', async (req, res) => {
             "floorplans-2": floorplans2ID,
             "statement-of-information": statementOfInformationID != "" ? [{ id: statementOfInformationID }] : "",
             "front-page-image": "",
-            
+
             "videolink": getText(result.videoLink?._attributes?.href),
             "online-tour-1": externalLink1,
             "online-tour-2": externalLink2
