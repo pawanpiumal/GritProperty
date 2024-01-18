@@ -11,14 +11,17 @@ const config = require('../../config/keys')
 
 
 const timeSplitString = (value, type) => {
-    if (type == "date") {
-        return value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8);
-    } else if (type == "datetime") {
-        return value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8) + "T" + value.slice(9, 11) + ":" + value.slice(11, 13);
+    if (value != "") {
+        if (type == "date") {
+            return value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8);
+        } else if (type == "datetime") {
+            return value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8) + "T" + value.slice(9, 11) + ":" + value.slice(11, 13);
+        } else {
+            return value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8) + "T" + value.slice(9, 11) + ":" + value.slice(11, 13) + ":" + value.slice(13, 15);
+        }
     } else {
-        return value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8) + "T" + value.slice(9, 11) + ":" + value.slice(11, 13) + ":" + value.slice(13, 15);
+        return ""
     }
-
 }
 
 const getText = (value) => {
@@ -32,10 +35,10 @@ const getText = (value) => {
             return value
         };
     }
-    for (var x in value) {
-        // return value[Object.keys(value)[0]]; 
-        return value._text;
-    }
+    // for (var x in value) {
+    // return value[Object.keys(value)[0]]; 
+    return value._text;
+    // }
     return "";
 }
 
@@ -182,21 +185,38 @@ const fileOperation = async (url) => {
 }
 
 const checkList = async (type, uniqueidToCheck) => {
-    var url = config.WPmainURL + type + '?status=any'
+    var url = config.WPmainURL + type + '?status=any&per_page=100'
 
-    listRes = await axios.get(url, {
-        headers: {
-            "Authorization": `basic ${config.WPAuthorization}`
-        }
-    }).catch(err => {
-        errorSQL("Checking List of Posts", err)
-    })
-    var postList = listRes.data.map(element => {
-        return {
-            id: element.id,
-            uniqueid: element.meta.uniqueid
-        }
-    })
+    var maxPages = 5
+    var postList = []
+    var breakLoop = false
+
+    for (let index = 1; index < maxPages; index++) {
+        listRes = await axios.get(`${url}&page=${index}`, {
+            headers: {
+                "Authorization": `basic ${config.WPAuthorization}`
+            }
+        }).catch(err => {
+            if (err.response.data.code != "rest_post_invalid_page_number") {
+                errorSQL("Checking List of Media", err)
+            }
+            breakLoop = true
+            errorSQL("Checking List of Posts", err)
+        })
+
+        if (breakLoop) { break }
+        listRes.data.forEach(element => {
+            postList.push({
+                id: element.id,
+                uniqueid: element.meta.uniqueid
+            })
+        })
+
+        if (index == 1 && postList.length == 0) { break }
+        maxPages = maxPages + 1
+    }
+
+
     // console.log(postList)
     var postId = ""
     for (let index = 0; index < postList.length; index++) {
@@ -208,6 +228,7 @@ const checkList = async (type, uniqueidToCheck) => {
         }
     }
     // console.log(postId);
+    // console.log(postList);
     return (postId);
 }
 
@@ -216,7 +237,18 @@ router.post('/', async (req, res) => {
 
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
 
-    result = result.residential
+    var type = Object.keys(result)[0]
+
+    result = result[type]
+
+    if (type == 'residential') {
+        type = 'residential_home'
+    } else if (type == 'rental') {
+        type = 'residential_rental'
+    } else if (type == 'land') {
+        type = 'residential_land'
+    }
+
     if (req.query == "publish" || req.query == "draft") {
         reqStatus = req.query
     } else {
@@ -271,7 +303,7 @@ router.post('/', async (req, res) => {
     // var imagesArray = []
     // var statementOfInformationID = ""
 
-    itemResidential = {
+    item = {
         "title": {
             "raw": getText(result.headline)
         },
@@ -282,35 +314,58 @@ router.post('/', async (req, res) => {
             "agentid": getText(result.agentID),
             "listing-id": getText(result.listingId),
             "new-or-old-post": "Old",
-            "status": getText(result.underOffer?._attributes?.value) == "no" ? getText(result._attributes?.status) : "Under Offer",
+            "status": getText(result.underOffer?._attributes?.value) == "yes" ? "Under Offer" : (getText(result.depositTaken?._attributes?.value) == "yes" ? "DepositTaken" : getText(result._attributes?.status)),
+
             "sale-price": getText(result.soldDetails?.soldPrice),
             "show_sale_price": getText(result.soldDetails?.soldPrice?._attributes?.display),
             "sale-date": timeSplitString(getText(result.soldDetails?.soldDate), "date"),
+            'leased-date': timeSplitString(getText(result._attributes?.modTime), "date"),
+
             "ishomelandpackage": getText(result.isHomeLandPackage?._attributes?.value),
             "category-resi": getText(result.category?._attributes?.name),
+            "category-rental": getText(result.category?._attributes?.name),
+
             "new-or-established-nopackage": getText(result.newConstruction) == 0 ? "false" : "true",
             "new-or-established-package": getText(result.newConstruction) == 0 ? "false" : "true",
+
             "lead-agent": "842",
             "dual-agent": "843",
+
+            "rental-per-week": getText(result.rent),
+            "rental-per-calendar-month": "",
+            "security-bond": getText(result.bond),
+
             "authority": getText(result.authority?._attributes?.value),
             "auction-date": getText(result.auction?._attributes?.date),
             "set-sale-date": getText(result.setSale?._attributes?.date),
+
             "price": getText(result.price),
-            "price-display": getText(result.priceView) != "" ? "yes_" : getText(result.price?._attributes?.display),
+            "price-display": !isEmptyJson(getText(result.priceView)) ? "yes_" : getText(result.price?._attributes?.display) != "" ? getText(result.price?._attributes?.display) : getText(result.rent?._attributes?.display),
             "priceview": getText(result.priceView),
+
+            "date-available": getText(result.dateAvailable) != "" ? getText(result.dateAvailable).slice(0, 10) : "",
+
             "vendor-name": getText(result.vendorDetails?.name),
             "vendor-email": getText(result.vendorDetails?.email),
             "vendor-phone-number": getText(result.vendorDetails?.telephone),
             "communication-preferences": {
                 "receiveCampaignReport": getText(result.vendorDetails?.email?._attributes?.receiveCampaignReport) == "" ? "yes" : getText(result.vendorDetails?.email?._attributes?.receiveCampaignReport),
             },
+
             "subnumber": getText(result.address?.subNumber),
+            "lotnumber": getText(result.address?.lotNumber),
             "streetnumber-rr": getText(result.address?.streetNumber),
             "street-rr": getText(result.address?.street),
             "suburbstatepostcode": `${getText(result.address?.suburb)} - ${getText(result.address?.state)} - ${getText(result.address?.postcode)}`,
             "municipality": getText(result.municipality),
             "streetview": getText(result.address?._attributes?.streetview),
             "display_address": getText(result.address?._attributes?.display),
+            
+            "auction-result": getText(result.auctionOutcome?.auctionResult?._attributes?.type),
+            "auction-date_prior": getText(result.auctionOutcome?.auctionDate),
+            "maximum-bid": getText(result.auctionOutcome?.auctionMaxBid?._attributes?.value),
+            "maximum-bid_passedin": getText(result.auctionOutcome?.auctionMaxBid?._attributes?.value),
+
             "bedrooms-resi-nostu": getText(result.features?.bedrooms),
             "bedrooms-rr-studio": "Studio",
             "bathrooms": getText(result.features?.bathrooms),
@@ -325,6 +380,12 @@ router.post('/', async (req, res) => {
             "land-size": getText(result.landDetails?.area),
             "land-size-unit": getText(result.landDetails?.area?._attributes?.unit),
             "energy-efficiency-rating": getText(result.buildingDetails?.energyRating),
+            
+            "allowances": {
+                "Furnished": getText(result.allowances?.furnished),
+                "Pet Friendly": getText(result.allowances?.petFriendly),
+                "Smokers": getText(result.allowances?.smokers),
+            },
             "outdoor-features": {
                 "Balcony": getText(result.features?.balcony) == 0 ? "false" : "true",
                 "Courtyard": getText(result.features?.courtyard) == 0 ? "false" : "true",
@@ -373,23 +434,26 @@ router.post('/', async (req, res) => {
                 "Water Tank": getText(result.ecoFriendly?.waterTank) == 0 ? "false" : "true"
             },
             "other-features": getText(result.features?.otherFeatures),
+
             "headline": getText(result.headline),
             "description_property": getText(result.description),
+
             "property-images": imagesArray,
             "floorplans": floorplans1ID,
             "floorplans-2": floorplans2ID,
             "statement-of-information": statementOfInformationID != "" ? [{ id: statementOfInformationID }] : "",
             "front-page-image": "",
+            
             "videolink": getText(result.videoLink?._attributes?.href),
             "online-tour-1": externalLink1,
             "online-tour-2": externalLink2
         }
     }
 
-    let data = JSON.stringify(itemResidential);
-    let postId = await checkList("residential_home", itemResidential.meta.uniqueid)
+    let data = JSON.stringify(item);
+    let postId = await checkList(type, item.meta.uniqueid)
     // console.log(postId);
-    let restURL = `${config.WPmainURL}residential_home/${postId != "" ? postId : ""}`
+    let restURL = `${config.WPmainURL}${type}/${postId != "" ? postId : ""}`
     // console.log(restURL);
     let configReq = {
         method: 'post',
@@ -410,35 +474,17 @@ router.post('/', async (req, res) => {
             errorSQL("Upload Property", error)
         });
 
-    res.status(200).json({ result, itemResidential })
+    res.status(200).json({ result, item })
 })
 
 router.post('/rental', async (req, res) => {
 
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
 
-    result = result.rental
+    result = result[Object.keys(result)[0]]
 
     res.status(200).json({ result })
 })
-
-// router.get('/', (req, res) => {
-//     var axios = require('axios')
-//     axios.request({
-//         baseURL: 'https://charming-beaver.13-211-217-84.plesk.page/wp-json/wp/v2/residential_home/837',
-//         // proxy: {
-//         //     protocol: 'https',
-//         //     host: '127.0.0.1',
-//         //     port: 2081
-//         // }
-//     }).then((res2) => {
-//         console.log(res2)
-//         res.status(200).json({ msg: "Working" })
-//     }).catch(err2 => {
-//         console.error({err2})
-//     })
-
-// });
 
 router.post("/as", (req, res) => {
     console.log(req)
