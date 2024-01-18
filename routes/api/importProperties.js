@@ -22,6 +22,9 @@ const timeSplitString = (value, type) => {
 }
 
 const getText = (value) => {
+    if (value == undefined) {
+        return ""
+    }
     if (typeof value == "string") {
         if (value == undefined) {
             return ""
@@ -50,17 +53,17 @@ const updateImageDatabase = async () => {
     var breakLoop = false;
     for (let index = 1; index < max_pages; index++) {
         var listRes = await axios.get(`${url}&page=${index}`).catch(err => {
-            if (err.response.data.code == "rest_post_invalid_page_number") {
-                breakLoop = true
-                max_pages = index
+            if (err.response.data.code != "rest_post_invalid_page_number") {
+                errorSQL("Checking List of Media", err)
             }
-            errorSQL("Checking List of Media", err)
+            breakLoop = true
         })
         if (breakLoop) { break; }
+        max_pages = max_pages + 1
         listRes.data.map(element => {
             var file = {
                 id: element.id,
-                original_image_name: element.media_details.original_image
+                original_image_name: element.title.rendered
             }
             fileList.push(file)
         })
@@ -75,11 +78,11 @@ updateImageDatabase()
 const checkAvailabilityFile = async (filename) => {
     var url = `${config.WPmediaURL}`
     var file = {}
+    // console.log(imageDatabase);
     for (let index = 0; index < imageDatabase.length; index++) {
         const element = imageDatabase[index];
-        if (element.original_image_name == filename) {
+        if (element.original_image_name.includes(filename.replace(/\.[^/.]+$/, ""))) {
             file = element
-            console.log({file});
             break;
         }
     }
@@ -164,14 +167,18 @@ const deleteFile = (filename) => {
 }
 
 const fileOperation = async (url) => {
-    var filename = url.split('/').pop()
-    await checkAvailabilityFile(filename)
-    await downloadFile(url, filename)
-    var fileId = await uploadFile(filename)
-    deleteFile(filename)
-    updateImageDatabase()
-    // console.log({fileId})
-    return fileId;
+    if (url != "") {
+        var filename = url.split('/').pop()
+        await checkAvailabilityFile(filename)
+        await downloadFile(url, filename)
+        var fileId = await uploadFile(filename)
+        deleteFile(filename)
+        await updateImageDatabase()
+        // console.log({fileId})
+        return fileId;
+    } else {
+        return ""
+    }
 }
 
 const checkList = async (type, uniqueidToCheck) => {
@@ -216,12 +223,50 @@ router.post('/', async (req, res) => {
         reqStatus = "draft"
     }
 
-    var imagesArray = await Promise.all(result.objects.img.map(async element => {
-        var id = await fileOperation(getText(element._attributes.url))
-        return { id }
-    }))
+    var resultImgArray = result.objects?.img
+    if (resultImgArray) {
+        if (Array.isArray(resultImgArray)) {
+            var imagesArray = await Promise.all(resultImgArray.map(async element => {
+                var id = await fileOperation(getText(element._attributes?.url))
+                return { id }
+            }))
+        } else {
+            var imagesArray = [{ id: await fileOperation(getText(resultImgArray._attributes?.url)) }]
+        }
+    } else {
+        var imagesArray = ""
+    }
 
-    var statementOfInformationID = await fileOperation(getText(result.media.attachment._attributes.url))
+    var statementOfInformationID = await fileOperation(getText(result.media?.attachment?._attributes?.url))
+
+    var resultFloorPlanArray = result.objects?.floorplan
+    if (resultFloorPlanArray) {
+        if (Array.isArray(resultFloorPlanArray)) {
+            var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url)) }]
+            var floorplans2ID = [{ id: await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url)) }]
+        } else {
+            var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray._attributes?.url)) }]
+            var floorplans2ID = ""
+        }
+    } else {
+        var floorplans1ID = ""
+        var floorplans2ID = ""
+    }
+
+    var externalLinkArray = result.externalLink
+    if (externalLinkArray) {
+        if (Array.isArray(externalLinkArray)) {
+            var externalLink1 = getText(externalLinkArray[0]._attributes?.href)
+            var externalLink2 = getText(externalLinkArray[1]._attributes?.href)
+        } else {
+            var externalLink1 = getText(externalLinkArray[0]._attributes?.href)
+            var externalLink2 = ""
+        }
+    } else {
+        var externalLink1 = ""
+        var externalLink2 = ""
+    }
+
 
     // var imagesArray = []
     // var statementOfInformationID = ""
@@ -232,112 +277,112 @@ router.post('/', async (req, res) => {
         },
         "status": reqStatus,
         "meta": {
-            "mod-time": timeSplitString(result._attributes.modTime),
+            "mod-time": timeSplitString(result._attributes?.modTime),
             "uniqueid": getText(result.uniqueID),
             "agentid": getText(result.agentID),
             "listing-id": getText(result.listingId),
             "new-or-old-post": "Old",
-            "status": getText(result.underOffer._attributes.value) == "no" ? getText(result._attributes.status) : "Under Offer",
-            "sale-price": getText(result.soldDetails.soldPrice),
-            "show_sale_price": getText(result.soldDetails.soldPrice._attributes.display),
-            "sale-date": timeSplitString(getText(result.soldDetails.soldDate), "date"),
-            "ishomelandpackage": getText(result.isHomeLandPackage._attributes.value),
-            "category-resi": getText(result.category._attributes.name),
+            "status": getText(result.underOffer?._attributes?.value) == "no" ? getText(result._attributes?.status) : "Under Offer",
+            "sale-price": getText(result.soldDetails?.soldPrice),
+            "show_sale_price": getText(result.soldDetails?.soldPrice?._attributes?.display),
+            "sale-date": timeSplitString(getText(result.soldDetails?.soldDate), "date"),
+            "ishomelandpackage": getText(result.isHomeLandPackage?._attributes?.value),
+            "category-resi": getText(result.category?._attributes?.name),
             "new-or-established-nopackage": getText(result.newConstruction) == 0 ? "false" : "true",
             "new-or-established-package": getText(result.newConstruction) == 0 ? "false" : "true",
             "lead-agent": "842",
             "dual-agent": "843",
-            "authority": getText(result.authority._attributes.value),
-            "auction-date": "",
-            "set-sale-date": "",
+            "authority": getText(result.authority?._attributes?.value),
+            "auction-date": getText(result.auction?._attributes?.date),
+            "set-sale-date": getText(result.setSale?._attributes?.date),
             "price": getText(result.price),
-            "price-display": getText(result.priceView) != "" ? "yes_" : getText(result.price._attributes.display),
+            "price-display": getText(result.priceView) != "" ? "yes_" : getText(result.price?._attributes?.display),
             "priceview": getText(result.priceView),
-            "vendor-name": "",
-            "vendor-email": "",
-            "vendor-phone-number": "",
+            "vendor-name": getText(result.vendorDetails?.name),
+            "vendor-email": getText(result.vendorDetails?.email),
+            "vendor-phone-number": getText(result.vendorDetails?.telephone),
             "communication-preferences": {
-                "receiveCampaignReport": "true"
+                "receiveCampaignReport": getText(result.vendorDetails?.email?._attributes?.receiveCampaignReport) == "" ? "yes" : getText(result.vendorDetails?.email?._attributes?.receiveCampaignReport),
             },
-            "subnumber": getText(result.address.subNumber),
-            "streetnumber-rr": getText(result.address.streetNumber),
-            "street-rr": getText(result.address.street),
-            "suburbstatepostcode": `${getText(result.address.suburb)} - ${getText(result.address.state)} - ${getText(result.address.postcode)}`,
-            "municipality": getText(result.municipality._value),
-            "streetview": getText(result.address._attributes.streetview),
-            "display_address": getText(result.address._attributes.display),
-            "bedrooms-resi-nostu": getText(result.features.bedrooms),
+            "subnumber": getText(result.address?.subNumber),
+            "streetnumber-rr": getText(result.address?.streetNumber),
+            "street-rr": getText(result.address?.street),
+            "suburbstatepostcode": `${getText(result.address?.suburb)} - ${getText(result.address?.state)} - ${getText(result.address?.postcode)}`,
+            "municipality": getText(result.municipality),
+            "streetview": getText(result.address?._attributes?.streetview),
+            "display_address": getText(result.address?._attributes?.display),
+            "bedrooms-resi-nostu": getText(result.features?.bedrooms),
             "bedrooms-rr-studio": "Studio",
-            "bathrooms": getText(result.features.bathrooms),
-            "ensuite": getText(result.features.ensuite),
-            "toilets": getText(result.features.toilets),
-            "garages": getText(result.features.garages),
-            "car": getText(result.features.carports),
-            "open-spaces": getText(result.features.openSpaces),
-            "livingarea": getText(result.features.livingAreas),
-            "house-size": getText(result.buildingDetails.area),
-            "house-size-area": getText(result.buildingDetails.area._attributes.unit),
-            "land-size": getText(result.landDetails.area),
-            "land-size-unit": getText(result.landDetails.area._attributes.unit),
-            "energy-efficiency-rating": getText(result.buildingDetails.energyRating),
+            "bathrooms": getText(result.features?.bathrooms),
+            "ensuite": getText(result.features?.ensuite),
+            "toilets": getText(result.features?.toilets),
+            "garages": getText(result.features?.garages),
+            "car": getText(result.features?.carports),
+            "open-spaces": getText(result.features?.openSpaces),
+            "livingarea": getText(result.features?.livingAreas),
+            "house-size": getText(result.buildingDetails?.area),
+            "house-size-area": getText(result.buildingDetails?.area?._attributes?.unit),
+            "land-size": getText(result.landDetails?.area),
+            "land-size-unit": getText(result.landDetails?.area?._attributes?.unit),
+            "energy-efficiency-rating": getText(result.buildingDetails?.energyRating),
             "outdoor-features": {
-                "Balcony": getText(result.features.balcony) == 0 ? "false" : "true",
-                "Courtyard": getText(result.features.courtyard) == 0 ? "false" : "true",
-                "Deck": getText(result.features.deck) == 0 ? "false" : "true",
-                "Fully Fenced": getText(result.features.fullyFenced) == 0 ? "false" : "true",
-                "Outdoor Entertainment Area": getText(result.features.outdoorEnt) == 0 ? "false" : "true",
-                "Outside Spa": getText(result.features.outsideSpa) == 0 ? "false" : "true",
-                "Remote Garage": getText(result.features.remoteGarage) == 0 ? "false" : "true",
-                "Secure Parking": getText(result.features.secureParking) == 0 ? "false" : "true",
-                "Shed": getText(result.features.shed) == 0 ? "false" : "true",
-                "Swimming Pool - Above Ground": getText(result.features.poolAboveGround) == 0 ? "false" : "true",
-                "Swimming Pool - In Ground": getText(result.features.poolInGround) == 0 ? "false" : "true",
-                "Tennis Court": getText(result.features.tennisCourt) == 0 ? "false" : "true"
+                "Balcony": getText(result.features?.balcony) == 0 ? "false" : "true",
+                "Courtyard": getText(result.features?.courtyard) == 0 ? "false" : "true",
+                "Deck": getText(result.features?.deck) == 0 ? "false" : "true",
+                "Fully Fenced": getText(result.features?.fullyFenced) == 0 ? "false" : "true",
+                "Outdoor Entertainment Area": getText(result.features?.outdoorEnt) == 0 ? "false" : "true",
+                "Outside Spa": getText(result.features?.outsideSpa) == 0 ? "false" : "true",
+                "Remote Garage": getText(result.features?.remoteGarage) == 0 ? "false" : "true",
+                "Secure Parking": getText(result.features?.secureParking) == 0 ? "false" : "true",
+                "Shed": getText(result.features?.shed) == 0 ? "false" : "true",
+                "Swimming Pool - Above Ground": getText(result.features?.poolAboveGround) == 0 ? "false" : "true",
+                "Swimming Pool - In Ground": getText(result.features?.poolInGround) == 0 ? "false" : "true",
+                "Tennis Court": getText(result.features?.tennisCourt) == 0 ? "false" : "true"
             },
             "indoor-features": {
-                "Alarm System": getText(result.features.alarmSystem) == 0 ? "false" : "true",
-                "Broadband Internet Available": getText(result.features.broadband) == 0 ? "false" : "true",
-                "Built-in Wardrobes": getText(result.features.builtInRobes) == 0 ? "false" : "true",
-                "Dishwasher": getText(result.features.dishwasher) == 0 ? "false" : "true",
-                "Ducted Vacuum System": getText(result.features.vacuumSystem) == 0 ? "false" : "true",
-                "Floorboards": getText(result.features.floorboards) == 0 ? "false" : "true",
-                "Gym": getText(result.features.gym) == 0 ? "false" : "true",
-                "Inside Spa": getText(result.features.insideSpa) == 0 ? "false" : "true",
-                "Intercom": getText(result.features.intercom) == 0 ? "false" : "true",
-                "Pay TV Access": getText(result.features.payTV) == 0 ? "false" : "true",
-                "Rumpus Room": getText(result.features.rumpusRoom) == 0 ? "false" : "true",
-                "Study": getText(result.features.study) == 0 ? "false" : "true",
-                "Workshop": getText(result.features.workshop) == 0 ? "false" : "true"
+                "Alarm System": getText(result.features?.alarmSystem) == 0 ? "false" : "true",
+                "Broadband Internet Available": getText(result.features?.broadband) == 0 ? "false" : "true",
+                "Built-in Wardrobes": getText(result.features?.builtInRobes) == 0 ? "false" : "true",
+                "Dishwasher": getText(result.features?.dishwasher) == 0 ? "false" : "true",
+                "Ducted Vacuum System": getText(result.features?.vacuumSystem) == 0 ? "false" : "true",
+                "Floorboards": getText(result.features?.floorboards) == 0 ? "false" : "true",
+                "Gym": getText(result.features?.gym) == 0 ? "false" : "true",
+                "Inside Spa": getText(result.features?.insideSpa) == 0 ? "false" : "true",
+                "Intercom": getText(result.features?.intercom) == 0 ? "false" : "true",
+                "Pay TV Access": getText(result.features?.payTV) == 0 ? "false" : "true",
+                "Rumpus Room": getText(result.features?.rumpusRoom) == 0 ? "false" : "true",
+                "Study": getText(result.features?.study) == 0 ? "false" : "true",
+                "Workshop": getText(result.features?.workshop) == 0 ? "false" : "true"
             },
             "heating--cooling": {
-                "Air Conditioning": getText(result.features.airConditioning) == 0 ? "false" : "true",
-                "Ducted Cooling": getText(result.features.ductedCooling) == 0 ? "false" : "true",
-                "Ducted Heating": getText(result.features.ductedHeating) == 0 ? "false" : "true",
-                "Evaporative Cooling": getText(result.features.evaporativeCooling) == 0 ? "false" : "true",
-                "Gas Heating": getText(result.features.gasHeating) == 0 ? "false" : "true",
-                "Hydronic Heating": getText(result.features.hydronicHeating) == 0 ? "false" : "true",
-                "Open Fireplace": getText(result.features.openFirePlace) == 0 ? "false" : "true",
-                "Reverse Cycle Air Conditioning": getText(result.features.reverseCycleAirCon) == 0 ? "false" : "true",
-                "Split-System Air Conditioning": getText(result.features.splitSystemAirCon) == 0 ? "false" : "true",
-                "Split-System Heating": getText(result.features.splitSystemHeating) == 0 ? "false" : "true"
+                "Air Conditioning": getText(result.features?.airConditioning) == 0 ? "false" : "true",
+                "Ducted Cooling": getText(result.features?.ductedCooling) == 0 ? "false" : "true",
+                "Ducted Heating": getText(result.features?.ductedHeating) == 0 ? "false" : "true",
+                "Evaporative Cooling": getText(result.features?.evaporativeCooling) == 0 ? "false" : "true",
+                "Gas Heating": getText(result.features?.gasHeating) == 0 ? "false" : "true",
+                "Hydronic Heating": getText(result.features?.hydronicHeating) == 0 ? "false" : "true",
+                "Open Fireplace": getText(result.features?.openFirePlace) == 0 ? "false" : "true",
+                "Reverse Cycle Air Conditioning": getText(result.features?.reverseCycleAirCon) == 0 ? "false" : "true",
+                "Split-System Air Conditioning": getText(result.features?.splitSystemAirCon) == 0 ? "false" : "true",
+                "Split-System Heating": getText(result.features?.splitSystemHeating) == 0 ? "false" : "true"
             },
             "eco-friendly-features": {
-                "Grey Water System": getText(result.ecoFriendly.greyWaterSystem) == 0 ? "false" : "true",
-                "Solar Hot Water": getText(result.ecoFriendly.solarHotWater) == 0 ? "false" : "true",
-                "Solar Panels": getText(result.ecoFriendly.solarPanels) == 0 ? "false" : "true",
-                "Water Tank": getText(result.ecoFriendly.waterTank) == 0 ? "false" : "true"
+                "Grey Water System": getText(result.ecoFriendly?.greyWaterSystem) == 0 ? "false" : "true",
+                "Solar Hot Water": getText(result.ecoFriendly?.solarHotWater) == 0 ? "false" : "true",
+                "Solar Panels": getText(result.ecoFriendly?.solarPanels) == 0 ? "false" : "true",
+                "Water Tank": getText(result.ecoFriendly?.waterTank) == 0 ? "false" : "true"
             },
-            "other-features": getText(result.features.otherFeatures),
+            "other-features": getText(result.features?.otherFeatures),
             "headline": getText(result.headline),
             "description_property": getText(result.description),
             "property-images": imagesArray,
-            "floorplans": "",
-            "floorplans-2": "",
-            "statement-of-information": [{ id: statementOfInformationID }],
+            "floorplans": floorplans1ID,
+            "floorplans-2": floorplans2ID,
+            "statement-of-information": statementOfInformationID != "" ? [{ id: statementOfInformationID }] : "",
             "front-page-image": "",
-            "videolink": "http://",
-            "online-tour-1": "http://",
-            "online-tour-2": "http://"
+            "videolink": getText(result.videoLink?._attributes?.href),
+            "online-tour-1": externalLink1,
+            "online-tour-2": externalLink2
         }
     }
 
@@ -368,125 +413,11 @@ router.post('/', async (req, res) => {
     res.status(200).json({ result, itemResidential })
 })
 
-router.get('/rental', (req, res) => {
-    // console.log({ req })
+router.post('/rental', async (req, res) => {
+
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
 
     result = result.rental
-    if (req.query == "publish" || req.query == "draft") {
-        reqStatus = req.query
-    } else {
-        reqStatus = "draft"
-    }
-
-
-    itemRental = {
-        "title": {
-            "raw": getText(result.headline)
-        },
-        "status": reqStatus,
-        "meta": {
-            "uniqueid": "",
-            "agentid": "KKDIXI",
-            "new-or-old-post": "New",
-            "status": "current",
-            "leased-date": "",
-            "category-rental": "House",
-            "new-or-established-rental-nopackage": "false",
-            "lead-agent": "842",
-            "dual-agent": "843",
-            "rental-per-week": "1",
-            "rental-per-calendar-month": "1",
-            "security-bond": "1",
-            "price-display": "Show Actual price",
-            "price-text": "",
-            "date-available": "2024-01-09",
-            "subnumber": "",
-            "streetnumber-rr": "1",
-            "street-rr": "sad",
-            "suburbstatepostcode": "CALWELL - ACT - 2905",
-            "municipality": "",
-            "streetview": "yes",
-            "display_address": "yes",
-            "bedrooms-rental-nostu": "1",
-            "bedrooms-rr-studio": "Studio",
-            "bathrooms-rr": "1",
-            "ensuite": "",
-            "toilets": "",
-            "garages": "",
-            "car": "",
-            "livingarea": "",
-            "house-size": "",
-            "house-size-unit": "square",
-            "land-size": "",
-            "land-size-unit": "square",
-            "energy-efficiency-rating": "",
-            "allowances": {
-                "Furnished": "true",
-                "Pet Friendly": "false",
-                "Smokers": "false"
-            },
-            "outdoor-features": {
-                "Balcony": "false",
-                "Courtyard": "false",
-                "Deck": "false",
-                "Fully Fenced": "false",
-                "Outdoor Entertainment Area": "false",
-                "Outside Spa": "false",
-                "Remote Garage": "false",
-                "Secure Parking": "false",
-                "Shed": "false",
-                "Swimming Pool - Above Ground": "false",
-                "Swimming Pool - In Ground": "false",
-                "Tennis Court": "false"
-            },
-            "indoor-features": {
-                "Alarm System": "false",
-                "Broadband Internet Available": "false",
-                "Built-in Wardrobes": "false",
-                "Dishwasher": "false",
-                "Ducted Vacuum System": "false",
-                "Floorboards": "false",
-                "Gym": "false",
-                "Inside Spa": "false",
-                "Intercom": "false",
-                "Pay TV Access": "false",
-                "Rumpus Room": "false",
-                "Study": "false",
-                "Workshop": "false"
-            },
-            "heating--cooling": {
-                "Air Conditioning": "false",
-                "Ducted Cooling": "false",
-                "Ducted Heating": "false",
-                "Evaporative Cooling": "false",
-                "Gas Heating": "false",
-                "Hydronic Heating": "false",
-                "Open Fireplace": "false",
-                "Reverse Cycle Air Conditioning": "false",
-                "Split-System Air Conditioning": "false",
-                "Split-System Heating": "false"
-            },
-            "eco-friendly-features": {
-                "Grey Water System": "false",
-                "Solar Hot Water": "false",
-                "Solar Panels": "false",
-                "Water Tank": "false"
-            },
-            "headline": "Proeperty",
-            "_description": "sDasdasd",
-            "property-images": [],
-            "floorplans": "",
-            "floorplans-2": "",
-            "statement-of-information": "",
-            "front-page-image": "",
-            "video-url": "http://",
-            "online-tour-1": "http://",
-            "online-tour-2": "http://"
-        }
-    }
-
-
 
     res.status(200).json({ result })
 })
