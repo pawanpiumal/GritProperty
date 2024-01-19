@@ -14,9 +14,11 @@ const port = 3000
 // Import routes
 const postProperty = require('./routes/api/importProperties')
 
+app.use(cors())
 // middleware
 app.use(bodyParser.json())
 app.use(xmlparser())
+
 
 
 // Create mySQL Connection

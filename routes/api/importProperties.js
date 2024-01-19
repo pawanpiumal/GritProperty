@@ -313,6 +313,8 @@ const CreateAgent = async (Agent) => {
 
 router.post('/', async (req, res) => {
 
+    console.log({"msg":"Request Recievied"});
+
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
 
     var type = Object.keys(result)[0]

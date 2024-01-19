@@ -1,0 +1,14 @@
+#header-nav-bar{
+    background-color: #111111;
+}
+.navbar-title{
+    color: orangered;
+    text-align: center;
+    margin-top: 0px;
+    padding: 2%;
+
+}
+.nav-link{
+    text-decoration: none;
+    color: gold;
+}
