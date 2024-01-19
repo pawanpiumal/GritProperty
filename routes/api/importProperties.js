@@ -275,7 +275,7 @@ const CreateAgent = async (Agent) => {
 
     var AgentID = ""
     agentList.forEach(e => {
-        if (e.uniquelistingagentid == unique || e.name == name) {
+        if (e.unique == unique || e.name == name) {
             AgentID = e.id,
             unique = e.uniquelistingagentid
         }
@@ -369,7 +369,7 @@ router.post('/', async (req, res) => {
             var externalLink1 = getText(externalLinkArray[0]._attributes?.href)
             var externalLink2 = getText(externalLinkArray[1]._attributes?.href)
         } else {
-            var externalLink1 = getText(externalLinkArray._attributes?.href)
+            var externalLink1 = getText(externalLinkArray[0]._attributes?.href)
             var externalLink2 = ""
         }
     } else {
