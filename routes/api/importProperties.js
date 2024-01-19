@@ -4,6 +4,8 @@ const axios = require('axios')
 const fs = require('fs')
 const https = require('http')
 const FormData = require('form-data')
+const { v4: uuidv4 } = require('uuid');
+
 
 const errorSQL = require('../../middleware/db').errorSQL
 const router = express.Router()
@@ -35,10 +37,10 @@ const getText = (value) => {
             return value
         };
     }
-    // for (var x in value) {
-    // return value[Object.keys(value)[0]]; 
-    return value._text;
-    // }
+    for (var x in value) {
+        // return value[Object.keys(value)[0]]; 
+        return value._text;
+    }
     return "";
 }
 
@@ -233,13 +235,13 @@ const checkList = async (type, uniqueidToCheck) => {
 
 const CreateAgent = async (Agent) => {
 
-    var url = `${config.WPmainURL}agent/?status=any&per_page=100&`
+    var geturl = `${config.WPmainURL}agent/?status=any&per_page=100&`
     var agentList = []
 
     var max_pages = 2
     var breakLoop = false
     for (let index = 1; index < max_pages; index++) {
-        await axios.get(`${url}page=${index}`, {
+        await axios.get(`${geturl}page=${index}`, {
             headers: {
                 authorization: `basic ${config.WPAuthorization}`
             }
@@ -247,6 +249,7 @@ const CreateAgent = async (Agent) => {
             res.data.forEach(e => {
                 agentList.push({
                     id: e.id,
+                    name: e.meta.name,
                     unique: e.meta.uniquelistingagentid
                 })
             })
@@ -262,25 +265,51 @@ const CreateAgent = async (Agent) => {
     }
 
     var unique = getText(Agent.uniquelistingagentid)
-    // var name = getText(Agent.name)
-    // var telephone = getText(Agent.telephone)
-    // var email = getText(Agent.email)
-    // var twitter = getText(Agent.twitterURL)
-    // var facebook = getText(Agent.facebookURL)
-    // var linkedIn = getText(Agent.linkedInURL)
-    // var media = getText(Agent.media?.attachment?._attributes?.url)
-    
+    var name = getText(Agent.name)
+    var telephone = getText(Agent.telephone)
+    var email = getText(Agent.email)
+    var twitter = getText(Agent.twitterURL)
+    var facebook = getText(Agent.facebookURL)
+    var linkedIn = getText(Agent.linkedInURL)
+    var media = getText(Agent.media?.attachment?._attributes?.url)
+
     var AgentID = ""
-    agentList.forEach(e=>{
-        if(e.unique==unique){
-            AgentID = e.id
+    agentList.forEach(e => {
+        if (e.uniquelistingagentid == unique || e.name == name) {
+            AgentID = e.id,
+            unique = e.uniquelistingagentid
         }
     })
-    if(AgentID != ""){return AgentID}
+    // if (AgentID != "") { return AgentID }
 
+    media = await fileOperation(media)
+    var item = {
+        title: name,
+        status: "publish",
+        meta: {
+            'uniquelistingagentid': unique != "" ? unique : uuidv4(),
+            'name': name,
+            'mobile-number': telephone,
+            'email': email,
+            'twitterurl': twitter,
+            'facebook-url': facebook,
+            'linkedin-url': linkedIn,
+            'agent-photo': [{ id: media }]
+        }
+    }
+    const postURL = `${config.WPmainURL}agent/${AgentID}`
+    await axios.post(postURL,JSON.stringify(item), {
+        headers: {
+            'Content-Type': 'application/json',
+            authorization: `basic ${config.WPAuthorization}`
+        }
+    }).then(res2 => {
+        return (res2.data.id);
+    }).catch(err => {
+        errorSQL("Upload/Update Agent", err)
+        console.log(err);
+    })
 }
-
-// CreateAgent()
 
 router.post('/', async (req, res) => {
 
@@ -340,7 +369,7 @@ router.post('/', async (req, res) => {
             var externalLink1 = getText(externalLinkArray[0]._attributes?.href)
             var externalLink2 = getText(externalLinkArray[1]._attributes?.href)
         } else {
-            var externalLink1 = getText(externalLinkArray[0]._attributes?.href)
+            var externalLink1 = getText(externalLinkArray._attributes?.href)
             var externalLink2 = ""
         }
     } else {
@@ -348,6 +377,19 @@ router.post('/', async (req, res) => {
         var externalLink2 = ""
     }
 
+    var AgentArray = result.listingAgent
+    if (AgentArray) {
+        if (Array.isArray(AgentArray)) {
+            var leadAgentID = CreateAgent(AgentArray[0])
+            var dualAgentID = CreateAgent(AgentArray[1])
+        } else {
+            var leadAgentID = CreateAgent(AgentArray)
+            var dualAgentID = ""
+        }
+    } else {
+        var leadAgentID = ""
+        var dualAgentID = ""
+    }
 
     // var imagesArray = []
     // var statementOfInformationID = ""
@@ -377,8 +419,8 @@ router.post('/', async (req, res) => {
             "new-or-established-nopackage": getText(result.newConstruction) == 0 ? "false" : "true",
             "new-or-established-package": getText(result.newConstruction) == 0 ? "false" : "true",
 
-            "lead-agent": "842",
-            "dual-agent": "843",
+            "lead-agent": leadAgentID,
+            "dual-agent": dualAgentID,
 
             "rental-per-week": getText(result.rent),
             "rental-per-calendar-month": "",
