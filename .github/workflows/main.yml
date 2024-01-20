@@ -7,4 +7,4 @@ on:
 
 jobs:
   - name: "deploy"
-    run: curl 'http://34.228.13.110:3002/git'
+    run: curl http://34.228.13.110:3002/git
