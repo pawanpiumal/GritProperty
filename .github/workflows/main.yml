@@ -7,4 +7,7 @@ on:
 
 jobs:
   - name: "deploy"
-    run: curl http://34.228.13.110:3002/git
+    uses: alesil/actions-curl@v1.2
+    with:
+    # Curl parameters
+    curl: http://34.228.13.110:3002/git
