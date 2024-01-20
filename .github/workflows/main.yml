@@ -1,4 +1,4 @@
-name: "Ping URL:
+name: "Ping URL"
 
 on:
   push:
@@ -9,5 +9,4 @@ jobs:
   - name: "deploy"
     uses: alesil/actions-curl@v1.2
     with:
-    # Curl parameters
-    curl: http://34.228.13.110:3002/git
+      curl: http://34.228.13.110:3002/git
