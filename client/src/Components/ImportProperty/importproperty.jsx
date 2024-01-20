@@ -16,7 +16,7 @@ class importproperty extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            xml: "<x>Remove this</x>",
+            xml: "<x>Remove this Code</x>",
             isLoading: false,
             jsonResult: { result: "result" }
         }
