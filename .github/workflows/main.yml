@@ -6,7 +6,10 @@ on:
       - main
 
 jobs:
-  - name: "deploy"
-    uses: alesil/actions-curl@v1.2
-    with:
-      curl: http://34.228.13.110:3002/git
+  update-server:
+    runs-on: ubuntu-latest
+    steps:  
+    - name: deploy
+      uses: alesil/actions-curl@v1.2
+      with:
+        curl: http://34.228.13.110:3002/git
