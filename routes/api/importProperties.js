@@ -600,7 +600,7 @@ router.post('/rental', async (req, res) => {
 })
 
 router.post("/as", (req, res) => {
-    console.log(req)
+    errorSQL('request',req)
     res.status(200).json({ s: "2" })
 })
 
