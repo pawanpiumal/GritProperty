@@ -80,8 +80,8 @@ class importproperty extends Component {
                                 <div>
                                     <textarea value={this.state.xml} onChange={this.handleInputChange} name="xml" className='xml-area' rows="20" />
                                 </div>
-                                <div>
-                                    <input type="submit" value="Submit" />
+                                <div style={{marginLeft:'5%',}}>
+                                    <input type="submit" value="Submit" style={{width:'100%',padding:'1%',fontWeight:'bold'}}/>
                                 </div>
                             </form>
                             <div className='xml-viewer'>
