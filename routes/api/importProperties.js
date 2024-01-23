@@ -600,7 +600,10 @@ router.post('/rental', async (req, res) => {
 })
 
 router.post("/as", (req, res) => {
-    errorSQL('request',req)
+    console.log(req);
+    errorSQL('request','request recieved')
+    errorSQL('request',JSON.stringify(req.body))
+    errorFile(JSON.stringify({'request':req}))
     res.status(200).json({ s: "2" })
 })
 
