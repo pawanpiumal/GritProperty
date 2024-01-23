@@ -78,12 +78,16 @@ const updateImageDatabase = async () => {
     imageDatabase = fileList
 }
 
-updateImageDatabase()
+// updateImageDatabase().then(res=>{
+//     console.log(imageDatabase);
+// })
+
 
 const checkAvailabilityFile = async (filename) => {
     var url = `${config.WPmediaURL}`
     var file = {}
     // console.log(imageDatabase);
+    await updateImageDatabase()
     for (let index = 0; index < imageDatabase.length; index++) {
         const element = imageDatabase[index];
         if (element.original_image_name.includes(filename.replace(/\.[^/.]+$/, ""))) {
@@ -175,6 +179,7 @@ const fileOperation = async (url) => {
     if (url != "") {
         var filename = url.split('/').pop()
         await checkAvailabilityFile(filename)
+        await updateImageDatabase()
         await downloadFile(url, filename)
         var fileId = await uploadFile(filename)
         deleteFile(filename)
@@ -277,12 +282,13 @@ const CreateAgent = async (Agent) => {
     agentList.forEach(e => {
         if (e.unique == unique || e.name == name) {
             AgentID = e.id,
-            unique = e.uniquelistingagentid
+                unique = e.uniquelistingagentid
         }
     })
     // if (AgentID != "") { return AgentID }
 
     media = await fileOperation(media)
+    // console.log(media);
     var item = {
         title: name,
         status: "publish",
@@ -297,23 +303,28 @@ const CreateAgent = async (Agent) => {
             'agent-photo': [{ id: media }]
         }
     }
+    // console.log(item.meta);
     const postURL = `${config.WPmainURL}agent/${AgentID}`
-    await axios.post(postURL,JSON.stringify(item), {
+    var agentID = ""
+    await axios.post(postURL, JSON.stringify(item), {
         headers: {
             'Content-Type': 'application/json',
             authorization: `basic ${config.WPAuthorization}`
         }
     }).then(res2 => {
-        return (res2.data.id);
+        agentID = res2.data.id;
     }).catch(err => {
         errorSQL("Upload/Update Agent", err)
         console.log(err);
+        agentID = ""
     })
+    return (agentID);
 }
+
 
 router.post('/', async (req, res) => {
 
-    console.log({"msg":"Request Recievied"});
+    console.log({ "msg": "Request Recievied" });
 
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
 
@@ -382,10 +393,10 @@ router.post('/', async (req, res) => {
     var AgentArray = result.listingAgent
     if (AgentArray) {
         if (Array.isArray(AgentArray)) {
-            var leadAgentID = CreateAgent(AgentArray[0])
-            var dualAgentID = CreateAgent(AgentArray[1])
+            var leadAgentID = await CreateAgent(AgentArray[0])
+            var dualAgentID = await CreateAgent(AgentArray[1])
         } else {
-            var leadAgentID = CreateAgent(AgentArray)
+            var leadAgentID = await CreateAgent(AgentArray)
             var dualAgentID = ""
         }
     } else {
@@ -421,8 +432,8 @@ router.post('/', async (req, res) => {
             "new-or-established-nopackage": getText(result.newConstruction) == 0 ? "false" : "true",
             "new-or-established-package": getText(result.newConstruction) == 0 ? "false" : "true",
 
-            "lead-agent": leadAgentID,
-            "dual-agent": dualAgentID,
+            "lead-agent": leadAgentID.toString(),
+            "dual-agent": dualAgentID.toString(),
 
             "rental-per-week": getText(result.rent),
             "rental-per-calendar-month": "",
