@@ -605,4 +605,8 @@ router.post("/as", (req, res) => {
 })
 
 
+router.get('/a',(req,res)=>{
+    errorSQL('check','working')
+    res.status(200).json({msg:"test done"})
+})
 module.exports = router;
