@@ -12,7 +12,8 @@ const app = express()
 const port = 3000
 
 // Import routes
-const postProperty = require('./routes/api/importProperties')
+const importProperty = require('./routes/api/importProperties')
+const exportProperty = require('./routes/api/exportProperties')
 
 app.use(cors())
 // middleware
@@ -64,7 +65,8 @@ connection.query('CREATE TABLE IF NOT EXISTS errors (\
 
 connection.end()
 
-app.use("/api/postproperty", postProperty)
+app.use("/api/postproperty", importProperty)
+app.use("/api/exportproperty", exportProperty)
 
 app.get('/',(req,res)=>{
     res.status(200).json({msg:"working"})
