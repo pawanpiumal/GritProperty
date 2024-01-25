@@ -35,6 +35,18 @@ getZeroOne = (string) => {
     }
 }
 
+getDateTypes = (date, type) => {
+    if (type == 'mod' || type == 'm' || type == "withoutT") {
+        return (`${date.split('T')[0]}-${date.split('T')[1]}`)
+    } else if (type == "TnoDash") {
+        return (date.toISOString().slice(0, 19).replace(/[^0-9T]/g, ""))
+    } else if (type == "5") {
+        return (`${date.split('T')[0]}-${date.split('T')[1].split(":")[0]}:${(Math.ceil(date.split('T')[1].split(":")[1] / 5) * 5).toString().length == 1 ? '0' + (Math.ceil(date.split('T')[1].split(":")[1] / 5) * 5).toString() : (Math.ceil(date.split('T')[1].split(":")[1] / 5) * 5).toString()}`)
+    } else {
+        return date
+    }
+}
+
 getProperty = async (id, type) => {
     id = parseInt(id)
 
@@ -62,7 +74,7 @@ getProperty = async (id, type) => {
         })
     }
     leadAgent = leadAgent.data.meta
-    dualAgent = dualAgent.data?.meta
+    dualAgent = dualAgent.data?.meta.name != ""? dualAgent.data?.meta: ""
 
     if (type == 'residential_home')
         item = {
@@ -73,12 +85,26 @@ getProperty = async (id, type) => {
                 },
                 'agentID': data.agentid,
                 'uniqueID': data.uniqueid,
-                'isHomeLandPackage': data.ishomelandpackage == 'true' ? 'yes' : 'no',
+                'isHomeLandPackage': {
+                    '_attributes': {
+                        'value': data.ishomelandpackage == 'true' ? 'yes' : 'no'
+                    }
+                },
                 'authority': {
                     '_attributes': {
                         'value': data.authority
                     }
                 },
+                'setSale': data.authority == "setsale" && data['set-sale-date'] ? {
+                    '_attributes': {
+                        'date': getDateTypes(data['set-sale-date'], '5')
+                    }
+                } : "",
+                'auction': data.authority == "auction" && data['auction-date'] ? {
+                    '_attributes': {
+                        'date': getDateTypes(data['auction-date'], '5')
+                    }
+                } : "",
                 'underOffer': {
                     '_attributes': {
                         'value': data.status == 'underoffer' ? 'yes' : 'no'
@@ -101,7 +127,7 @@ getProperty = async (id, type) => {
                     'twitterURL': leadAgent['twitterurl'],
                     'facebookURL': leadAgent['facebook-url'],
                     'linkedInURL': leadAgent['linedin-url'],
-                    'media': {
+                    'media':leadAgent && leadAgent['agent-photo'].length != 0? {
                         'attachment': {
                             '_attributes': {
                                 'id': 'm',
@@ -109,7 +135,7 @@ getProperty = async (id, type) => {
                                 'usage': 'agentPhoto'
                             }
                         }
-                    }
+                    }:""
                 }, {
                     '_attributes': {
                         'id': 2
@@ -126,7 +152,7 @@ getProperty = async (id, type) => {
                     'twitterURL': dualAgent?.['twitterurl'],
                     'facebookURL': dualAgent?.['facebook-url'],
                     'linkedInURL': dualAgent?.['linedin-url'],
-                    'media': {
+                    'media': dualAgent && dualAgent['agent-photo'].length != 0 ? {
                         'attachment': {
                             '_attributes': {
                                 'id': 'm',
@@ -134,15 +160,15 @@ getProperty = async (id, type) => {
                                 'usage': 'agentPhoto'
                             }
                         }
-                    }
+                    } : ""
                 }],
                 'price': {
                     '_attributes': {
-                        'display': data['price_display'] != 'no' ? 'yes' : 'no'
+                        'display': data['price-display'] != 'no' ? 'yes' : 'no'
                     },
                     '_text': data.price
                 },
-                'priceView': data['price_display'] == '_yes' ? data.priceView : "",
+                'priceView': data['price-display'] == 'yes_' ? data.priceview : "",
                 'address': {
                     '_attributes': {
                         'display': data.display_address
@@ -194,7 +220,7 @@ getProperty = async (id, type) => {
                                 }
                             })
                         })),
-                    'floorplan': [{
+                    'floorplan': data['floorplans-2'].length != 0 ? [{
                         '_attributes': {
                             'id': 1,
                             'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
@@ -202,13 +228,20 @@ getProperty = async (id, type) => {
                             'format': await getImageURL(data['floorplans'][0].id).toString().split('.').pop()
                         }
                     }, {
-                        '_attributes': data['floorplans-2'].length != 0 ? {
+                        '_attributes': {
                             'id': 2,
                             'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
                             'url': await getImageURL(data['floorplans-2'][0].id),
                             'format': await getImageURL(data['floorplans-2'][0].id).toString().split('.').pop()
-                        } : ""
-                    }]
+                        }
+                    }] : {
+                        '_attributes': {
+                            'id': 1,
+                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
+                            'url': await getImageURL(data['floorplans'][0].id),
+                            'format': await getImageURL(data['floorplans'][0].id).toString().split('.').pop()
+                        }
+                    }
                 },
                 'features': {
                     'otherFeatures': data['other-features'] != "" ? data['other-features'] : 0,
@@ -272,32 +305,45 @@ getProperty = async (id, type) => {
                         'href': data['online-tour-2']
                     } : ""
                 }],
-                'videoLink':data['videolink'] != "" ? {
-                    '_attributes':{
-                        'href':data['videolink']
+                'videoLink': data['videolink'] != "" ? {
+                    '_attributes': {
+                        'href': data['videolink']
                     }
-                }:"",
-                'landDetails':{
-                    'area':{
-                        '_attributes':{
-                            'unit':data['land-size-unit']
+                } : "",
+                'landDetails': {
+                    'area': {
+                        '_attributes': {
+                            'unit': data['land-size-unit']
                         },
-                        '_text':data['land-size']
+                        '_text': data['land-size']
                     }
                 },
-                'buildingDetails':{
-                    'area':{
-                        '_attributes':{
-                            'unit':data['house-size-area']
+                'buildingDetails': {
+                    'area': {
+                        '_attributes': {
+                            'unit': data['house-size-area']
                         },
-                        '_text':data['house-size']
+                        '_text': data['house-size']
                     },
-                    'energyRating':data['energy-efficiency-rating']
+                    'energyRating': data['energy-efficiency-rating']
+                },
+                'auctionOutcome': {
+                    'auctionResult': {}
                 }
             }
         }
-    console.log(xmlFormat(convert.json2xml(item, { compact: true, trim: false })));
-    // console.log((convert.json2xml(item, { compact: true })));
+
+    outerItem = {
+        'propertyList': {
+            '_attributes': {
+                'date': `${rest.data.modified.split('T')[0]}-${rest.data.modified.split('T')[1]}`
+            },
+            "": item
+        }
+    }
+
+    console.log(xmlFormat(convert.json2xml(outerItem, { compact: true, trim: false })));
+    console.log((convert.json2xml(outerItem, { compact: true })));
     // console.log(data['floorplans-2'].length);
 }
 getProperty(1533, 'residential_home')

@@ -1,0 +1,29 @@
+/**
+ * @param   int     $post_id    The ID of the post.
+ * @param   WP_Post $post       The post object.
+ * @param   bool    $update     True if the post already exists and is being updated
+ */
+function wpse_185340_post_ping( $post_id, $post, $update) {
+    //if ( $post->post_status === 'publish' ) { // Only fire when published
+       if($post->post_type=='agent' && get_post_meta($post_id,'uniquelistingagentid',true) == ""){
+		   update_post_meta($post_id,'uniquelistingagentid',vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex(random_bytes(16)), 4)),'');
+	   }else{
+		wp_remote_post(
+            'http://34.228.13.110:3000/api/postproperty/as',
+            array(
+				'headers'=>array('Content-Type' => 'application/json' ),
+                // https://codex.wordpress.org/HTTP_API
+                'blocking' => false, // If you don't need to know the response, disable blocking for an "async" request
+                'body' => json_encode(array(
+                    'post_id' => $post_id,
+					'post_type' =>  $post->post_type
+                    // or whatever
+                ))
+            )
+        );
+		
+    }  
+	wp_remote_get('http://34.228.13.110:3000/api/postproperty/a');
+}
+
+add_action( 'wp_insert_post', 'wpse_185340_post_ping', 10,3 );
