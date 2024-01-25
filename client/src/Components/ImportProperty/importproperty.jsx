@@ -38,7 +38,7 @@ class importproperty extends Component {
         this.setState({
             isLoading: true
         })
-        axios.post(`http://${process.env.REACT_APP_NodeURL}/all?status=draft`, `${this.state.xml}`, {
+        axios.post(`http://${process.env.REACT_APP_NodeURL}?status=draft`, `${this.state.xml}`, {
             headers: {
                 "Content-Type": "application/xml"
             }
