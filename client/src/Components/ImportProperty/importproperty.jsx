@@ -85,7 +85,7 @@ class importproperty extends Component {
                                 </div>
                             </form>
                             <div className='xml-viewer'>
-                                <XMLViewer xml={`"${this.state.xml}"`} />
+                                <XMLViewer xml={`"${this.state.xml}"`} collapsible={true} />
                             </div>
                             <div className='xml-viewer'>
                                 <ReactJson src={this.state.jsonResult} />
