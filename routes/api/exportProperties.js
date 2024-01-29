@@ -870,7 +870,9 @@ getProperty = async (id, type) => {
     console.log((convert.json2xml(outerItem, { compact: true })));
     // console.log(data['floorplans-2'].length);
 }
-getProperty(1533, 'residential_home')
+
+
+// getProperty(1533, 'residential_home')
 
 
 router.get('/', (req, res) => {
