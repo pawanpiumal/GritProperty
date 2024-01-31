@@ -605,6 +605,7 @@ getReaAccessToken = async () => {
 
 router.post('/export', async (req, res) => {
 
+    errorSQL('Publishing the property.', [req.body.post_id, req.body.post_type])
     // console.log(req.body);
     await axios.request({
         method: 'post',
@@ -616,7 +617,7 @@ router.post('/export', async (req, res) => {
         },
         data: `${await getProperty(req.body.post_id, req.body.post_type)}`
     }).then(result => {
-        errorSQL('REA Result',result.data)
+        errorSQL('REA Result', result.data)
         res.status(200).json({ result: result.data })
 
     }).catch((error) => {
