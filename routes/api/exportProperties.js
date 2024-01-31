@@ -479,8 +479,8 @@ getProperty = async (id, type) => {
             },
             'auctionDate': getDateTypes(data['auction-date_prior'], '5'),
             'auctionMaxBid': {
-                '_attributes':{
-                    'value':data['maximum-bid']
+                '_attributes': {
+                    'value': data['maximum-bid']
                 }
             }
 
@@ -532,7 +532,7 @@ getProperty = async (id, type) => {
                 },
                 '_text': data['right-depth-m']
             }],
-            'crossover': {
+            'crossOver': {
                 '_attributes': {
                     'value': data['cross-over']
                 }
@@ -577,14 +577,53 @@ getProperty = async (id, type) => {
             "": innerItem
         }
     }
-    console.log(xmlFormat(convert.json2xml(outerItem, { compact: true, trim: false })));
-    console.log((convert.json2xml(outerItem, { compact: true })));
+    // console.log(xmlFormat(convert.json2xml(outerItem, { compact: true, trim: false })));
+    console.log();
+    return (convert.json2xml(outerItem, { compact: true }))
 }
 
 // getProperty(1834, 'residential_land')
+getReaAccessToken = async () => {
+    let data = new FormData();
+    data.append('grant_type', 'client_credentials');
 
-router.post('/export', (req, res) => {
-    console.log();
+    var token = await axios.request({
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: config.reaTokenURL,
+        headers: {
+            'Authorization': config.clientAuth,
+            ...data.getHeaders()
+        },
+        data: data
+    }).catch((error) => {
+        errorSQL('Getting Access Token fro REA', error)
+    });
+
+    return (token.data.access_token)
+}
+
+router.post('/export', async (req, res) => {
+
+    // console.log(req.body);
+    await axios.request({
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: config.reaPublishURL,
+        headers: {
+            'Content-Type': 'text/xml',
+            'Authorization': `Bearer ${await getReaAccessToken()}`
+        },
+        data: `${await getProperty(req.body.post_id, req.body.post_type)}`
+    }).then(result => {
+        res.status(200).json({ result: result.data })
+    }).catch((error) => {
+        errorSQL('Publishing the property.', error)
+        console.error({ error });
+        res.status(400).json({ error })
+    });
+
+
 })
 
 router.get('/', (req, res) => {
