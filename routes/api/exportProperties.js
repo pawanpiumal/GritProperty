@@ -290,7 +290,7 @@ getProperty = async (id, type) => {
     if (type == "residential_home") {
         item['category'] = {
             '_attributes': {
-                name: data['category-rental']
+                name: data['category-resi']
             }
         }
     }
