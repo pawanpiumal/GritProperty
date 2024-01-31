@@ -582,7 +582,8 @@ getProperty = async (id, type) => {
     return (convert.json2xml(outerItem, { compact: true }))
 }
 
-// getProperty(1834, 'residential_land')
+getProperty(1845, 'residential_home').then(res=>console.log({res}))
+
 getReaAccessToken = async () => {
     let data = new FormData();
     data.append('grant_type', 'client_credentials');
@@ -605,6 +606,9 @@ getReaAccessToken = async () => {
 
 router.post('/export', async (req, res) => {
 
+    propertyItem = await getProperty(req.body.post_id, req.body.post_type)
+    
+    errorSQL('Publishing the property.', propertyItem)
     errorSQL('Publishing the property.', [req.body.post_id, req.body.post_type])
     // console.log(req.body);
     await axios.request({
@@ -615,7 +619,7 @@ router.post('/export', async (req, res) => {
             'Content-Type': 'text/xml',
             'Authorization': `Bearer ${await getReaAccessToken()}`
         },
-        data: `${await getProperty(req.body.post_id, req.body.post_type)}`
+        data: `${propertyItem}`
     }).then(result => {
         errorSQL('REA Result', result.data)
         res.status(200).json({ result: result.data })
