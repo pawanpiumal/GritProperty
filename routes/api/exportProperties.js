@@ -616,7 +616,9 @@ router.post('/export', async (req, res) => {
         },
         data: `${await getProperty(req.body.post_id, req.body.post_type)}`
     }).then(result => {
+        errorSQL('REA Result',result.data)
         res.status(200).json({ result: result.data })
+
     }).catch((error) => {
         errorSQL('Publishing the property.', error)
         console.error({ error });
