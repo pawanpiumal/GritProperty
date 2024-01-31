@@ -64,798 +64,35 @@ getProperty = async (id, type) => {
     // console.log(rest.data);
     var data = rest.data.meta
 
-    var leadAgent = await axios.get(`${config.WPmainURL}agent/${data['lead-agent']}`).catch(err => {
-        errorSQL('Get lead agent', err)
-    })
-    var dualAgent = ""
-    if (data['dual-agent'] != "" && data['dual-agent'] != data['lead-agent']) {
-        var dualAgent = await axios.get(`${config.WPmainURL}agent/${data['dual-agent']}`).catch(err => {
-            errorSQL('Get dual agent', err)
-        })
-    }
-    leadAgent = leadAgent.data.meta
-    dualAgent = dualAgent.data?.meta.name != "" ? dualAgent.data?.meta : ""
-
-    if (type == 'residential_home')
-        item = {
-            "residential": {
-                "_attributes": {
-                    "modTime": `${rest.data.modified.split('T')[0]}-${rest.data.modified.split('T')[1]}`,
-                    "status": data.status != 'underoffer' ? data.status : 'current',
-                },
-                'agentID': data.agentid,
-                'uniqueID': data.uniqueid,
-                'isHomeLandPackage': {
-                    '_attributes': {
-                        'value': data.ishomelandpackage == 'true' ? 'yes' : 'no'
-                    }
-                },
-                'authority': {
-                    '_attributes': {
-                        'value': data.authority
-                    }
-                },
-                'setSale': data.authority == "setsale" && data['set-sale-date'] ? {
-                    '_attributes': {
-                        'date': getDateTypes(data['set-sale-date'], '5')
-                    }
-                } : "",
-                'auction': data.authority == "auction" && data['auction-date'] ? {
-                    '_attributes': {
-                        'date': getDateTypes(data['auction-date'], '5')
-                    }
-                } : "",
-                'underOffer': {
-                    '_attributes': {
-                        'value': data.status == 'underoffer' ? 'yes' : 'no'
-                    }
-                },
-                'newConstruction': data['new-or-established-nopackage'] == 'true' ? 1 : 0,
-                'listingAgent': [{
-                    '_attributes': {
-                        'id': 1
-                    },
-                    'uniqueListingAgentID': leadAgent.uniquelistingagentid,
-                    'name': leadAgent.name,
-                    'telephone': {
-                        '_attributes': {
-                            'type': 'mobile'
-                        },
-                        '_text': leadAgent['mobile-number']
-                    },
-                    'email': leadAgent.email,
-                    'twitterURL': leadAgent['twitterurl'],
-                    'facebookURL': leadAgent['facebook-url'],
-                    'linkedInURL': leadAgent['linedin-url'],
-                    'media': leadAgent && leadAgent['agent-photo'].length != 0 ? {
-                        'attachment': {
-                            '_attributes': {
-                                'id': 'm',
-                                'url': await getImageURL(leadAgent['agent-photo'][0].id),
-                                'usage': 'agentPhoto'
-                            }
-                        }
-                    } : ""
-                }, {
-                    '_attributes': {
-                        'id': 2
-                    },
-                    'uniqueListingAgentID': dualAgent?.uniquelistingagentid,
-                    'name': dualAgent?.name,
-                    'telephone': {
-                        '_attributes': {
-                            'type': 'mobile'
-                        },
-                        '_text': dualAgent?.['mobile-number'] ? dualAgent?.['mobile-number'] : ""
-                    },
-                    'email': dualAgent?.email,
-                    'twitterURL': dualAgent?.['twitterurl'],
-                    'facebookURL': dualAgent?.['facebook-url'],
-                    'linkedInURL': dualAgent?.['linedin-url'],
-                    'media': dualAgent && dualAgent['agent-photo'].length != 0 ? {
-                        'attachment': {
-                            '_attributes': {
-                                'id': 'm',
-                                'url': await getImageURL(dualAgent?.['agent-photo'][0].id),
-                                'usage': 'agentPhoto'
-                            }
-                        }
-                    } : ""
-                }],
-                'price': {
-                    '_attributes': {
-                        'display': data['price-display'] != 'no' ? 'yes' : 'no'
-                    },
-                    '_text': data.price
-                },
-                'priceView': data['price-display'] == 'yes_' ? data.priceview : "",
-                'address': {
-                    '_attributes': {
-                        'display': data.display_address
-                    },
-                    'subNumber': data.subnumber,
-                    'streetNumber': data['streetnumber-rr'],
-                    'street': data['street-rr'],
-                    'suburb': {
-                        '_attributes': {
-                            'display': "yes"
-                        },
-                        '_text': data.suburbstatepostcode.split(' - ')[0]
-                    },
-                    'state': data.suburbstatepostcode.split(' - ')[1],
-                    'postcode': data.suburbstatepostcode.split(' - ')[2],
-                    'country': 'AUS'
-                },
-                'municipality': data.municipality,
-                'category': {
-                    '_attributes': {
-                        name: data['category-resi']
-                    }
-                },
-                'headline': data.headline,
-                'description': data['description_property'],
-                'media': data['statement-of-information'][0] ? {
-                    'attachment': {
-                        '_attributes': {
-                            'id': data['statement-of-information'][0]?.id,
-                            'usage': 'statementOfInformation',
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['statement-of-information'][0]?.id)
-                        }
-                    }
-                } : "",
-                'objects': {
-                    "":
-                        await Promise.all(data['property-images'].map(async (e, index) => {
-                            idArray = ['m', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'aa', 'ab', 'ac', 'ad', 'ae', 'af', 'ag', 'ah', 'ai']
-                            imageURL = await getImageURL(e.id)
-                            return ({
-                                'img': {
-                                    '_attributes': {
-                                        'id': idArray[index],
-                                        'format': imageURL.split('.').pop(),
-                                        'url': imageURL,
-                                        'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, "")
-                                    }
-                                }
-                            })
-                        })),
-                    'floorplan': data['floorplans-2'].length != 0 ? [{
-                        '_attributes': {
-                            'id': 1,
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['floorplans'][0]?.id),
-                            'format': await getImageURL(data['floorplans'][0]?.id).toString().split('.').pop()
-                        }
-                    }, {
-                        '_attributes': {
-                            'id': 2,
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['floorplans-2'][0]?.id),
-                            'format': await getImageURL(data['floorplans-2'][0]?.id).toString().split('.').pop()
-                        }
-                    }] : {
-                        '_attributes': {
-                            'id': 1,
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['floorplans'][0]?.id),
-                            'format': await getImageURL(data['floorplans'][0]?.id).toString().split('.').pop()
-                        }
-                    }
-                },
-                'features': {
-                    'otherFeatures': data['other-features'] != "" ? data['other-features'] : 0,
-                    'bedrooms': data['category-resi'] == "Studio" ? "Studio" : data['bedrooms-resi-nostu'],
-                    'bathrooms': data['bathrooms'],
-                    'ensuite': data['ensuite'],
-                    'garages': data['garages'],
-                    'carports': data['car'],
-                    'openSpaces': data['open-spaces'],
-                    'toilets': data['toilets'],
-                    'livingAgreas': data['livingarea'],
-                    'remoteGarage': getZeroOne(data['outdoor-features']['Remote Garage']),
-                    'secureParking': getZeroOne(data['outdoor-features']['Secure Parking']),
-                    'balcony': getZeroOne(data['outdoor-features']['Balcony']),
-                    'deck': getZeroOne(data['outdoor-features']['Deck']),
-                    'courtyard': getZeroOne(data['outdoor-features']['Courtyard']),
-                    'outdoorEnt': getZeroOne(data['outdoor-features']['Outdoor Entertainment Area']),
-                    'shed': getZeroOne(data['outdoor-features']['Shed']),
-                    'fullyFenced': getZeroOne(data['outdoor-features']['Fully Fenced']),
-                    // 'spa':'',
-                    'insideSpa': getZeroOne(data['indoor-features']['Inside Spa']),
-                    'outsideSpa': getZeroOne(data['outdoor-features']['Outside Spa']),
-                    'study': getZeroOne(data['indoor-features']['Study']),
-                    'gasHeating': getZeroOne(data['heating--cooling']['Gas Heating']),
-                    'workshop': getZeroOne(data['indoor-features']['Workshop']),
-                    'splitSystemHeating': getZeroOne(data['heating--cooling']['Split-System Heating']),
-                    'floorboards': getZeroOne(data['indoor-features']['Floorboards']),
-                    'splitSystemAirCon': getZeroOne(data['heating--cooling']['Split-System Air Conditioning']),
-                    'evaporativeCooling': getZeroOne(data['heating--cooling']['Evaporative Cooling']),
-                    'gym': getZeroOne(data['indoor-features']['Gym']),
-                    'broadband': getZeroOne(data['indoor-features']['Broadband Internet Available']),
-                    'builtInRobes': getZeroOne(data['indoor-features']['Built-in Wardrobes']),
-                    'hydronicHeating': getZeroOne(data['heating--cooling']['Hydronic Heating']),
-                    'payTV': getZeroOne(data['indoor-features']['Pay TV Access']),
-                    'dishwasher': getZeroOne(data['indoor-features']['Dishwasher']),
-                    'ductedHeating': getZeroOne(data['heating--cooling']['Ducted Heating']),
-                    'ductedCooling': getZeroOne(data['heating--cooling']['Ducted Cooling']),
-                    'reverseCycleAirCon': getZeroOne(data['heating--cooling']['Reverse Cycle Air Conditioning']),
-                    'rumpusRoom': getZeroOne(data['indoor-features']['Rumpus Room']),
-                    'airConditioning': getZeroOne(data['heating--cooling']['Air Conditioning']),
-                    'openFirePlace': getZeroOne(data['heating--cooling']['Open Fireplace']),
-                    'alarmSystem': getZeroOne(data['indoor-features']['Alarm System']),
-                    'vacuumSystem': getZeroOne(data['indoor-features']['Ducted Vacuum System']),
-                    'intercom': getZeroOne(data['indoor-features']['Intercom']),
-                    'poolAboveGround': getZeroOne(data['outdoor-features']['Swimming Pool - Above Ground']),
-                    'poolInGround': getZeroOne(data['outdoor-features']['Swimming Pool - In Ground']),
-                    'tennisCourt': getZeroOne(data['outdoor-features']['Tennis Court']),
-                },
-                'ecoFriendly': {
-                    'solarPanels': getZeroOne(data['eco-friendly-features']['Solar Panels']),
-                    'solarHotWater': getZeroOne(data['eco-friendly-features']['Solar Hot Water']),
-                    'waterTank': getZeroOne(data['eco-friendly-features']['Water Tank']),
-                    'greyWaterSystem': getZeroOne(data['eco-friendly-features']['Grey Water System']),
-                },
-                'externalLink': [{
-                    '_attributes': data['online-tour-1'].length != 0 ? {
-                        'href': data['online-tour-1']
-                    } : ""
-                }, {
-                    '_attributes': data['online-tour-2'].length != 0 ? {
-                        'href': data['online-tour-2']
-                    } : ""
-                }],
-                'videoLink': data['videolink'] != "" ? {
-                    '_attributes': {
-                        'href': data['videolink']
-                    }
-                } : "",
-                'landDetails': {
-                    'area': {
-                        '_attributes': {
-                            'unit': data['land-size-unit']
-                        },
-                        '_text': data['land-size']
-                    }
-                },
-                'buildingDetails': {
-                    'area': {
-                        '_attributes': {
-                            'unit': data['house-size-area']
-                        },
-                        '_text': data['house-size']
-                    },
-                    'energyRating': data['energy-efficiency-rating']
-                },
-                'auctionOutcome': {
-                    'auctionResult': {}
-                }
-            }
-        }
-
-
-    //==============================================================================
-
-    if (type == 'residential_rental')
-        item = {
-            "residential_rental": {
-                "_attributes": {
-                    "modTime": `${rest.data.modified.split('T')[0]}-${rest.data.modified.split('T')[1]}`,
-                    "status": data.status != 'underoffer' ? data.status : 'current',
-                },
-                'agentID': data.agentid,
-                'uniqueID': data.uniqueid,
-
-                'setSale': data.authority == "setsale" && data['set-sale-date'] ? {
-                    '_attributes': {
-                        'date': getDateTypes(data['set-sale-date'], '5')
-                    }
-                } : "",
-                'auction': data.authority == "auction" && data['auction-date'] ? {
-                    '_attributes': {
-                        'date': getDateTypes(data['auction-date'], '5')
-                    }
-                } : "",
-                'underOffer': {
-                    '_attributes': {
-                        'value': data.status == 'underoffer' ? 'yes' : 'no'
-                    }
-                },
-                'listingAgent': [{
-                    '_attributes': {
-                        'id': 1
-                    },
-                    'uniqueListingAgentID': leadAgent.uniquelistingagentid,
-                    'name': leadAgent.name,
-                    'telephone': {
-                        '_attributes': {
-                            'type': 'mobile'
-                        },
-                        '_text': leadAgent['mobile-number']
-                    },
-                    'email': leadAgent.email,
-                    'twitterURL': leadAgent['twitterurl'],
-                    'facebookURL': leadAgent['facebook-url'],
-                    'linkedInURL': leadAgent['linedin-url'],
-                    'media': leadAgent && leadAgent['agent-photo'].length != 0 ? {
-                        'attachment': {
-                            '_attributes': {
-                                'id': 'm',
-                                'url': await getImageURL(leadAgent['agent-photo'][0].id),
-                                'usage': 'agentPhoto'
-                            }
-                        }
-                    } : ""
-                }, {
-                    '_attributes': {
-                        'id': 2
-                    },
-                    'uniqueListingAgentID': dualAgent?.uniquelistingagentid,
-                    'name': dualAgent?.name,
-                    'telephone': {
-                        '_attributes': {
-                            'type': 'mobile'
-                        },
-                        '_text': dualAgent?.['mobile-number'] ? dualAgent?.['mobile-number'] : ""
-                    },
-                    'email': dualAgent?.email,
-                    'twitterURL': dualAgent?.['twitterurl'],
-                    'facebookURL': dualAgent?.['facebook-url'],
-                    'linkedInURL': dualAgent?.['linedin-url'],
-                    'media': dualAgent && dualAgent['agent-photo'].length != 0 ? {
-                        'attachment': {
-                            '_attributes': {
-                                'id': 'm',
-                                'url': await getImageURL(dualAgent?.['agent-photo'][0].id),
-                                'usage': 'agentPhoto'
-                            }
-                        }
-                    } : ""
-                }],
-                'price': {
-                    '_attributes': {
-                        'display': data['price-display'] != 'no' ? 'yes' : 'no'
-                    },
-                    '_text': data.price
-                },
-                'priceView': data['price-display'] == 'yes_' ? data.priceview : "",
-                'address': {
-                    '_attributes': {
-                        'display': data.display_address
-                    },
-                    'subNumber': data.subnumber,
-                    'streetNumber': data['streetnumber-rr'],
-                    'street': data['street-rr'],
-                    'suburb': {
-                        '_attributes': {
-                            'display': "yes"
-                        },
-                        '_text': data.suburbstatepostcode.split(' - ')[0]
-                    },
-                    'state': data.suburbstatepostcode.split(' - ')[1],
-                    'postcode': data.suburbstatepostcode.split(' - ')[2],
-                    'country': 'AUS'
-                },
-                'municipality': data.municipality,
-                'category': {
-                    '_attributes': {
-                        name: data['category-resi']
-                    }
-                },
-                'headline': data.headline,
-                'description': data['description_property'],
-                'media': {
-                    'attachment': {
-                        '_attributes': {
-                            'id': data['statement-of-information'][0]?.id,
-                            'usage': 'statementOfInformation',
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['statement-of-information'][0]?.id)
-                        }
-                    }
-                },
-                'objects': {
-                    "":
-                        await Promise.all(data['property-images'].map(async (e, index) => {
-                            idArray = ['m', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'aa', 'ab', 'ac', 'ad', 'ae', 'af', 'ag', 'ah', 'ai']
-                            imageURL = await getImageURL(e.id)
-                            return ({
-                                'img': {
-                                    '_attributes': {
-                                        'id': idArray[index],
-                                        'format': imageURL.split('.').pop(),
-                                        'url': imageURL,
-                                        'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, "")
-                                    }
-                                }
-                            })
-                        })),
-                    'floorplan': data['floorplans-2'].length != 0 ? [{
-                        '_attributes': {
-                            'id': 1,
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['floorplans'][0].id),
-                            'format': await getImageURL(data['floorplans'][0].id).toString().split('.').pop()
-                        }
-                    }, {
-                        '_attributes': {
-                            'id': 2,
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['floorplans-2'][0].id),
-                            'format': await getImageURL(data['floorplans-2'][0].id).toString().split('.').pop()
-                        }
-                    }] : {
-                        '_attributes': {
-                            'id': 1,
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['floorplans'][0].id),
-                            'format': await getImageURL(data['floorplans'][0].id).toString().split('.').pop()
-                        }
-                    }
-                },
-                'features': {
-                    'otherFeatures': data['other-features'] != "" ? data['other-features'] : 0,
-                    'bedrooms': data['category-resi'] == "Studio" ? "Studio" : data['bedrooms-resi-nostu'],
-                    'bathrooms': data['bathrooms'],
-                    'ensuite': data['ensuite'],
-                    'garages': data['garages'],
-                    'carports': data['car'],
-                    'openSpaces': data['open-spaces'],
-                    'toilets': data['toilets'],
-                    'livingAgreas': data['livingarea'],
-                    'remoteGarage': getZeroOne(data['outdoor-features']['Remote Garage']),
-                    'secureParking': getZeroOne(data['outdoor-features']['Secure Parking']),
-                    'balcony': getZeroOne(data['outdoor-features']['Balcony']),
-                    'deck': getZeroOne(data['outdoor-features']['Deck']),
-                    'courtyard': getZeroOne(data['outdoor-features']['Courtyard']),
-                    'outdoorEnt': getZeroOne(data['outdoor-features']['Outdoor Entertainment Area']),
-                    'shed': getZeroOne(data['outdoor-features']['Shed']),
-                    'fullyFenced': getZeroOne(data['outdoor-features']['Fully Fenced']),
-                    'insideSpa': getZeroOne(data['indoor-features']['Inside Spa']),
-                    'outsideSpa': getZeroOne(data['outdoor-features']['Outside Spa']),
-                    'study': getZeroOne(data['indoor-features']['Study']),
-                    'gasHeating': getZeroOne(data['heating--cooling']['Gas Heating']),
-                    'workshop': getZeroOne(data['indoor-features']['Workshop']),
-                    'splitSystemHeating': getZeroOne(data['heating--cooling']['Split-System Heating']),
-                    'floorboards': getZeroOne(data['indoor-features']['Floorboards']),
-                    'splitSystemAirCon': getZeroOne(data['heating--cooling']['Split-System Air Conditioning']),
-                    'evaporativeCooling': getZeroOne(data['heating--cooling']['Evaporative Cooling']),
-                    'gym': getZeroOne(data['indoor-features']['Gym']),
-                    'broadband': getZeroOne(data['indoor-features']['Broadband Internet Available']),
-                    'builtInRobes': getZeroOne(data['indoor-features']['Built-in Wardrobes']),
-                    'hydronicHeating': getZeroOne(data['heating--cooling']['Hydronic Heating']),
-                    'payTV': getZeroOne(data['indoor-features']['Pay TV Access']),
-                    'dishwasher': getZeroOne(data['indoor-features']['Dishwasher']),
-                    'ductedHeating': getZeroOne(data['heating--cooling']['Ducted Heating']),
-                    'ductedCooling': getZeroOne(data['heating--cooling']['Ducted Cooling']),
-                    'reverseCycleAirCon': getZeroOne(data['heating--cooling']['Reverse Cycle Air Conditioning']),
-                    'rumpusRoom': getZeroOne(data['indoor-features']['Rumpus Room']),
-                    'airConditioning': getZeroOne(data['heating--cooling']['Air Conditioning']),
-                    'openFirePlace': getZeroOne(data['heating--cooling']['Open Fireplace']),
-                    'alarmSystem': getZeroOne(data['indoor-features']['Alarm System']),
-                    'vacuumSystem': getZeroOne(data['indoor-features']['Ducted Vacuum System']),
-                    'intercom': getZeroOne(data['indoor-features']['Intercom']),
-                    'poolAboveGround': getZeroOne(data['outdoor-features']['Swimming Pool - Above Ground']),
-                    'poolInGround': getZeroOne(data['outdoor-features']['Swimming Pool - In Ground']),
-                    'tennisCourt': getZeroOne(data['outdoor-features']['Tennis Court']),
-                },
-                'ecoFriendly': {
-                    'solarPanels': getZeroOne(data['eco-friendly-features']['Solar Panels']),
-                    'solarHotWater': getZeroOne(data['eco-friendly-features']['Solar Hot Water']),
-                    'waterTank': getZeroOne(data['eco-friendly-features']['Water Tank']),
-                    'greyWaterSystem': getZeroOne(data['eco-friendly-features']['Grey Water System']),
-                },
-                'externalLink': [{
-                    '_attributes': data['online-tour-1'].length != 0 ? {
-                        'href': data['online-tour-1']
-                    } : ""
-                }, {
-                    '_attributes': data['online-tour-2'].length != 0 ? {
-                        'href': data['online-tour-2']
-                    } : ""
-                }],
-                'videoLink': data['videolink'] != "" ? {
-                    '_attributes': {
-                        'href': data['videolink']
-                    }
-                } : "",
-                'landDetails': {
-                    'area': {
-                        '_attributes': {
-                            'unit': data['land-size-unit']
-                        },
-                        '_text': data['land-size']
-                    }
-                },
-                'buildingDetails': {
-                    'area': {
-                        '_attributes': {
-                            'unit': data['house-size-area']
-                        },
-                        '_text': data['house-size']
-                    },
-                    'energyRating': data['energy-efficiency-rating']
-                },
-            }
-        }
-
-
-
-
-    //==============================================================================
-
-
-    //= =============================================================================
-
-
-    //  console.log({"lead-age":leadAgent});
-    if (type == 'residential_land')
-        item = {
-            "land": {
-                "_attributes": {
-                    "modTime": `${rest.data.modified.split('T')[0]}-${rest.data.modified.split('T')[1]}`,
-                    "status": data.status != 'underoffer' ? data.status : 'current',
-                },
-                'agentID': data.agentid,
-                'uniqueID': data.uniqueid,
-                'landCategory': {
-                    '_attributes': {
-                        'name': 'Residential'
-                    }
-                },
-                'authority': {
-                    '_attributes': {
-                        'value': data.authority
-                    }
-                },
-                'setSale': data.authority == "setsale" && data['set-sale-date'] ? {
-                    '_attributes': {
-                        'date': getDateTypes(data['set-sale-date'], '5')
-                    }
-                } : "",
-                'auction': data.authority == "auction" && data['auction-date'] ? {
-                    '_attributes': {
-                        'date': getDateTypes(data['auction-date'], '5')
-                    }
-                } : "",
-                'underOffer': {
-                    '_attributes': {
-                        'value': data.status == 'underoffer' ? 'yes' : 'no'
-                    }
-                },
-                'listingAgent': [{
-                    '_attributes': {
-                        'id': 1
-                    },
-                    'uniqueListingAgentID': leadAgent.uniquelistingagentid,
-                    'name': leadAgent.name,
-                    'telephone': {
-                        '_attributes': {
-                            'type': 'mobile'
-                        },
-                        '_text': leadAgent['mobile-number']
-                    },
-                    'email': leadAgent.email,
-                    'twitterURL': leadAgent['twitterurl'],
-                    'facebookURL': leadAgent['facebook-url'],
-                    'linkedInURL': leadAgent['linedin-url'],
-                    'media': leadAgent && leadAgent['agent-photo'].length != 0 ? {
-                        'attachment': {
-                            '_attributes': {
-                                'id': 'm',
-                                'url': await getImageURL(leadAgent['agent-photo'][0].id),
-                                'usage': 'agentPhoto'
-                            }
-                        }
-                    } : ""
-                }, {
-                    '_attributes': {
-                        'id': 2
-                    },
-                    'uniqueListingAgentID': dualAgent?.uniquelistingagentid,
-                    'name': dualAgent?.name,
-                    'telephone': {
-                        '_attributes': {
-                            'type': 'mobile'
-                        },
-                        '_text': dualAgent?.['mobile-number'] ? dualAgent?.['mobile-number'] : ""
-                    },
-                    'email': dualAgent?.email,
-                    'twitterURL': dualAgent?.['twitterurl'],
-                    'facebookURL': dualAgent?.['facebook-url'],
-                    'linkedInURL': dualAgent?.['linedin-url'],
-                    'media': dualAgent && dualAgent['agent-photo'].length != 0 ? {
-                        'attachment': {
-                            '_attributes': {
-                                'id': 'm',
-                                'url': await getImageURL(dualAgent?.['agent-photo'][0].id),
-                                'usage': 'agentPhoto'
-                            }
-                        }
-                    } : ""
-                }],
-                'price': {
-                    '_attributes': {
-                        'display': data['price-display'] != 'no' ? 'yes' : 'no'
-                    },
-                    '_text': data.price
-                },
-                'priceView': data['price-display'] == 'yes_' ? data.priceview : "",
-                'address': {
-                    '_attributes': {
-                        'display': data.display_address
-                    },
-                    'subNumber': data.subnumber,
-                    'streetNumber': data['streetnumber-rr'],
-                    'street': data['street-rr'],
-                    'suburb': {
-                        '_attributes': {
-                            'display': "yes"
-                        },
-                        '_text': data.suburbstatepostcode.split(' - ')[0]
-                    },
-                    'state': data.suburbstatepostcode.split(' - ')[1],
-                    'postcode': data.suburbstatepostcode.split(' - ')[2],
-                    'country': 'AUS'
-                },
-                'municipality': data.municipality,
-                'headline': data.headline,
-                'description': data['description_property'],
-                'media': data['statement-of-information'][0] ? {
-                    'attachment': {
-                        '_attributes': {
-                            'id': data['statement-of-information'][0]?.id,
-                            'usage': 'statementOfInformation',
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['statement-of-information'][0]?.id)
-                        }
-                    }
-                } : "",
-                'objects': [{
-                    "":
-                        await Promise.all(data['property-images'].map(async (e, index) => {
-                            idArray = ['m', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'aa', 'ab', 'ac', 'ad', 'ae', 'af', 'ag', 'ah', 'ai']
-                            imageURL = await getImageURL(e.id)
-                            return ({
-                                'img': {
-                                    '_attributes': {
-                                        'id': idArray[index],
-                                        'format': imageURL.split('.').pop(),
-                                        'url': imageURL,
-                                        'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, "")
-                                    }
-                                }
-                            })
-                        })),
-                },
-                data['floorplans'].length != 0 ? {
-                    'floorplan': data['floorplans-2'].length != 0 ? [{
-                        '_attributes': {
-                            'id': 1,
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['floorplans'][0]?.id),
-                            'format': await getImageURL(data['floorplans'][0]?.id).toString().split('.').pop()
-                        }
-                    }, {
-                        '_attributes': {
-                            'id': 2,
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['floorplans-2'][0]?.id),
-                            'format': await getImageURL(data['floorplans-2'][0]?.id).toString().split('.').pop()
-                        }
-                    }] : data['floorplans'].length != 0 ? {
-                        '_attributes': {
-                            'id': 1,
-                            'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                            'url': await getImageURL(data['floorplans'][0]?.id),
-                            'format': await getImageURL(data['floorplans'][0]?.id).toString().split('.').pop()
-                        }
-                    } : ""
-                } : ""],
-            },
-            'features': {
-                'fullyFenced': getZeroOne(data['outdoor-features']['Fully Fenced']),
-            },
-            'externalLink': [{
-                '_attributes': data['online-tour-1'].length != 0 ? {
-                    'href': data['online-tour-1']
-                } : ""
-            }, {
-                '_attributes': data['online-tour-2'].length != 0 ? {
-                    'href': data['online-tour-2']
-                } : ""
-            }],
-            'videoLink': data['videolink'] != "" ? {
-                '_attributes': {
-                    'href': data['videolink']
-                }
-            } : "",
-            'landDetails': {
-                'area': {
-                    '_attributes': {
-                        'unit': 'squareMeter'
-                    },
-                    '_text': parseFloat(data['land-size-sqm'])
-                },
-                'frontage': {
-                    '_attributes': {
-                        'unit': 'meter',
-                    },
-                    '_text': data['frontage-m']
-                },
-                'depth': [{
-                    '_attributes': {
-                        'unit': 'meter',
-                        'side': 'rear'
-                    },
-                    '_text': data['rear-depth-m']
-                },
-                {
-                    '_attributes': {
-                        'unit': 'meter',
-                        'side': 'left'
-                    },
-                    '_text': data['left-depth-m']
-                },
-                {
-                    '_attributes': {
-                        'unit': 'meter',
-                        'side': 'right'
-                    },
-                    '_text': data['right-depth-m']
-                }],
-                'crossover': data['cross-over'],
-            },
-            'auctionOutcome': {
-                'auctionResult': {}
-            }
-        }
-
-
-    outerItem = {
-        'propertyList': {
-            '_attributes': {
-                'date': `${rest.data.modified.split('T')[0]}-${rest.data.modified.split('T')[1]}`
-            },
-            "": item
-        }
-    }
-
-    //==============================================================================
-
-
-    console.log(xmlFormat(convert.json2xml(outerItem, { compact: true, trim: false })));
-    console.log((convert.json2xml(outerItem, { compact: true }))); 5
-    // console.log(data['floorplans-2'].length);
-}
-
-
-// getProperty(1834, 'residential_land')
-
-
-getProperty2 = async (id, type) => {
-    id = parseInt(id)
-
-    const url = `${config.WPmainURL}${type}/${id}`
-    const rest = await axios.get(url, {
-        headers: {
-            Authorization: `basic ${config.WPAuthorization}`
-        }
-    }).catch(err => {
-        errorSQL('getExportData', err)
-        console.error(err);
-    })
-
-
-    // console.log(rest.data);
-    var data = rest.data.meta
-
     item = {}
 
 
     item['agentID'] = data.agentid
     item['uniqueID'] = data.uniqueid
 
+    if (data['status'] == 'sold') {
+        item['soldDetails'] = {
+            'soldPrice': {
+                '_attributes': {
+                    'display': data['show_sale_price']
+                },
+                '_text': data['sale-price']
+            },
+            'soldDate': data['sale-date']
+        }
+    }
+
+    if (data['status'] == 'leased') {
+        item['soldDetails'] = {
+            'soldPrice': {
+                '_attributes': {
+                    'display': data['show_sale_price']
+                },
+                '_text': data['sale-price']
+            },
+            'soldDate': data['sale-date']
+        }
+    }
     if (type == "residential_home") {
         item['isHomeLandPackage'] = {
             '_attributes': {
@@ -893,8 +130,15 @@ getProperty2 = async (id, type) => {
             }
         }
     }
+    if (type == "residential_rental") {
+        item['depositTaken'] = {
+            '_attributes': {
+                'value': data.status == 'deposittaken' ? 'yes' : 'no'
+            }
+        }
+    }
 
-    if (type == 'residential_home') {
+    if (type == 'residential_home' || type == "residential_rental") {
         item['newConstruction'] = getZeroOne(data['new-or-established-nopackage'])
     }
 
@@ -978,25 +222,41 @@ getProperty2 = async (id, type) => {
             '_text': data.price
         }
 
-        item['priceview'] = data['price-display'] == 'yes_' ? data.priceview : ""
+        item['priceView'] = data['price-display'] == 'yes_' ? data['priceview'] : ""
     }
 
-    if(data['vendor-name']){
+    if (type == 'residential_rental') {
+        item['rent'] = {
+            '_attributes': {
+                'period': 'week',
+                'display': data['price-display'] != 'no' ? 'yes' : 'no'
+            },
+            '_text': data['rental-per-week']
+        }
+
+        item['bond'] = data['security-bond']
+
+        item['priceView'] = data['price-display'] == 'yes_' ? data['priceview'] : ""
+
+        item['dateAvailable'] = data['date-available']
+    }
+
+    if (false && data['vendor-name']) {
         let vendorTele = data['vendor-phone-number']
-        let vendorEmail =  data['vendor-email']
+        let vendorEmail = data['vendor-email']
 
         vendor = {}
         vendor['name'] = data['vendor-name']
-        if(vendorTele){
-            vendor['telephone']={
+        if (vendorTele) {
+            vendor['telephone'] = {
                 '_attributes': {
                     'type': 'mobile'
                 },
                 '_text': vendorTele
             }
         }
-        if(vendorEmail){
-            vendor['email']={
+        if (vendorEmail) {
+            vendor['email'] = {
                 '_attributes': {
                     'receiveCampaignReport': data['communication-preferences']?.['receiveCampaignReport'] == "false" ? "no" : "yes"
                 },
@@ -1005,12 +265,13 @@ getProperty2 = async (id, type) => {
         }
         item['vendorDetails'] = vendor
     }
-    
+
     item['address'] = {
         '_attributes': {
             'display': data.display_address
         },
         'subNumber': data.subnumber,
+        'lotNumber': data.lotnumber,
         'streetNumber': data['streetnumber-rr'],
         'street': data['street-rr'],
         'suburb': {
@@ -1024,35 +285,48 @@ getProperty2 = async (id, type) => {
         'country': 'AUS'
     }
 
-    item['municipality'] = data.municipality
-    item['category'] = {
-        '_attributes': {
-            name: data['category-resi']
+    item['municipality'] = data['municipality']
+
+    if (type == "residential_home") {
+        item['category'] = {
+            '_attributes': {
+                name: data['category-rental']
+            }
         }
     }
+
+    if (type == "residential_rental") {
+        item['category'] = {
+            '_attributes': {
+                name: data['category-rental']
+            }
+        }
+    }
+
     item['headline'] = data.headline
     item['description'] = data['description_property']
 
-    if (data['statement-of-information'][0]) {
+    if (data['statement-of-information']) {
         item['media'] = {
             '_attributes': {
-                'id': data['statement-of-information'][0]?.id,
+                'id': data['statement-of-information']?.id,
                 'usage': 'statementOfInformation',
                 'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                'url': await getImageURL(data['statement-of-information'][0]?.id)
+                'url': await getImageURL(data['statement-of-information']?.id)
             }
         }
     }
 
     objects = {}
-    objects[""] = await Promise.all(data['property-images'].map(async (e, index) => {
-        idArray = ['m', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'aa', 'ab', 'ac', 'ad', 'ae', 'af', 'ag', 'ah', 'ai']
-        imageURL = await getImageURL(e.id)
+    idArray = ['m', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'aa', 'ab', 'ac', 'ad', 'ae', 'af', 'ag', 'ah', 'ai']
+    objects[""] = await Promise.all(idArray.map(async (e, index) => {
+
+        imageURL = await getImageURL(data['property-images'][index]?.id)
         return ({
             'img': {
                 '_attributes': {
                     'id': idArray[index],
-                    'format': imageURL.split('.').pop(),
+                    'format': imageURL?.split('.').pop(),
                     'url': imageURL,
                     'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, "")
                 }
@@ -1097,14 +371,14 @@ getProperty2 = async (id, type) => {
     if (type == "residential_home" || type == "residential_rental") {
         item['features'] = {
             'otherFeatures': data['other-features'] != "" ? data['other-features'] : 0,
-            'bedrooms': data['category-resi'] == "Studio" ? "Studio" : data['bedrooms-resi-nostu'],
+            'bedrooms': ((data['category-resi'] && data['category-resi'] == "Studio") || (data['category-rental'] && data['category-rental'] == "Studio")) ? "Studio" : data['bedrooms-resi-nostu'],
             'bathrooms': data['bathrooms'],
             'ensuite': data['ensuite'],
             'garages': data['garages'],
             'carports': data['car'],
             'openSpaces': data['open-spaces'],
             'toilets': data['toilets'],
-            'livingAgreas': data['livingarea'],
+            'livingAreas': data['livingarea'],
             'remoteGarage': getZeroOne(data['outdoor-features']['Remote Garage']),
             'secureParking': getZeroOne(data['outdoor-features']['Secure Parking']),
             'balcony': getZeroOne(data['outdoor-features']['Balcony']),
@@ -1150,6 +424,14 @@ getProperty2 = async (id, type) => {
         }
     }
 
+    if (type == "residential_rental") {
+        item['allowances'] = {
+            'petFriendly': data['allowances']['Pet Friendly'] == "false" ? false : true,
+            'smokers': data['allowances']['Smokers'] == "false" ? false : true,
+            'furnished': data['allowances']['Furnished'] == "false" ? false : true,
+        }
+    }
+
     item['externalLink'] = [{
         '_attributes': data['online-tour-1'].length != 0 ? {
             'href': data['online-tour-1']
@@ -1175,19 +457,90 @@ getProperty2 = async (id, type) => {
         }
     }
 
-    item['buildingDetails'] = {
-        'area': {
-            '_attributes': {
-                'unit': data['house-size-area']
+    if (type == "residential_home" || type == "residential_rental") {
+        item['buildingDetails'] = {
+            'area': {
+                '_attributes': {
+                    'unit': data['house-size-area']
+                },
+                '_text': data['house-size']
             },
-            '_text': data['house-size']
-        },
-        'energyRating': data['energy-efficiency-rating']
+            'energyRating': data['energy-efficiency-rating']
+        }
+
     }
 
-    item['auctionOutcome'] = {
-        'auctionResult': {}
+    if (data['auction-result'] && data['auction-result'] != "") {
+        item['auctionOutcome'] = {
+            'auctionResult': {
+                "_attributes": {
+                    'type': data['auction-result']
+                }
+            },
+            'auctionDate': getDateTypes(data['auction-date_prior'], '5'),
+            'auctionMaxBid': {
+                '_attributes':{
+                    'value':data['maximum-bid']
+                }
+            }
+
+        }
     }
+
+    if (type == "residential_land") {
+        item['landCategory'] = {
+            '_attributes': {
+                'name': 'Residential'
+            }
+        }
+
+        item['features'] = {
+            'fullyFenced': getZeroOne(data['outdoor-features']['Fully Fenced']),
+        }
+
+        item['landDetails'] = {
+            'area': {
+                '_attributes': {
+                    'unit': 'squareMeter'
+                },
+                '_text': parseFloat(data['land-size-sqm'])
+            },
+            'frontage': {
+                '_attributes': {
+                    'unit': 'meter',
+                },
+                '_text': data['frontage-m']
+            },
+            'depth': [{
+                '_attributes': {
+                    'unit': 'meter',
+                    'side': 'rear'
+                },
+                '_text': data['rear-depth-m']
+            },
+            {
+                '_attributes': {
+                    'unit': 'meter',
+                    'side': 'left'
+                },
+                '_text': data['left-depth-m']
+            },
+            {
+                '_attributes': {
+                    'unit': 'meter',
+                    'side': 'right'
+                },
+                '_text': data['right-depth-m']
+            }],
+            'crossover': {
+                '_attributes': {
+                    'value': data['cross-over']
+                }
+            },
+        }
+
+    }
+
 
 
     innerItem = {}
@@ -1207,7 +560,7 @@ getProperty2 = async (id, type) => {
             },
             "": item
         }
-    } else if (type == 'residentail_land') {
+    } else if (type == 'residential_land') {
         innerItem['land'] = {
             '_attributes': {
                 "modTime": `${rest.data.modified.split('T')[0]}-${rest.data.modified.split('T')[1]}`,
@@ -1225,10 +578,14 @@ getProperty2 = async (id, type) => {
         }
     }
     console.log(xmlFormat(convert.json2xml(outerItem, { compact: true, trim: false })));
-
+    console.log((convert.json2xml(outerItem, { compact: true })));
 }
 
-getProperty2(1825, 'residential_home')
+// getProperty(1834, 'residential_land')
+
+router.post('/export', (req, res) => {
+    console.log();
+})
 
 router.get('/', (req, res) => {
     res.status(200).json({ msg: 'working' })
