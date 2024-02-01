@@ -1,0 +1,26 @@
+#datatable {
+    width: 100vw;
+    display: inline-grid;
+    justify-items: center;
+}
+
+#datatable2 {
+    width: 95vw;
+    border: 3px solid black;
+}
+
+#search-input {
+    width: 95%;
+    margin: 20px;
+    padding: 10px;
+    border: 3px solid black;
+    border-radius: 25px;
+    font-size: 15px;
+    padding-left: 20px;
+}
+
+#search {
+    font-size: 0px;
+    width: 100vw;
+    justify-items: center;
+}

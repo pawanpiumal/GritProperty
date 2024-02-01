@@ -18,7 +18,8 @@ class importproperty extends Component {
         this.state = {
             xml: "<x>Remove this Code before adding listing code</x>",
             isLoading: false,
-            jsonResult: { result: "result" }
+            jsonResult: { result: "result" },
+            draftPublish: "draft"
         }
 
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -32,13 +33,29 @@ class importproperty extends Component {
         })
     }
 
+    onToggle = (e) => {
+        // console.log();
+        this.setState({
+            'draftPublish': e.target.checked ? "publish" : "draft"
+        })
+    }
+
+    onfocusclean = (e) => {
+        if (this.state.xml == "<x>Remove this Code before adding listing code</x>") {
+            this.setState({
+                xml: ""
+            })
+        }
+
+    }
+
     handleSubmit(e) {
         e.preventDefault()
         console.log("Running");
         this.setState({
             isLoading: true
         })
-        axios.post(`http://${process.env.REACT_APP_NodeURL}?status=draft`, `${this.state.xml}`, {
+        axios.post(`http://${process.env.REACT_APP_NodeURL}?status=${this.state.draftPublish}`, `${this.state.xml}`, {
             headers: {
                 "Content-Type": "application/xml"
             }
@@ -47,7 +64,7 @@ class importproperty extends Component {
             Swal.fire({
                 icon: 'success',
                 title: 'Uploaded',
-                text: res
+                text: res.data
             })
             this.setState({
                 jsonResult: res.data
@@ -57,7 +74,7 @@ class importproperty extends Component {
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: err
+                text: err.response.data
             })
 
         }).finally(e => {
@@ -78,10 +95,16 @@ class importproperty extends Component {
                         <div>
                             <form onSubmit={this.handleSubmit}>
                                 <div>
-                                    <textarea value={this.state.xml} onChange={this.handleInputChange} name="xml" className='xml-area' rows="20" />
+                                    <textarea value={this.state.xml} onFocus={this.onfocusclean} onChange={this.handleInputChange} name="xml" className='xml-area' rows="20" />
                                 </div>
-                                <div style={{marginLeft:'5%',}}>
-                                    <input type="submit" value="Submit" style={{width:'100%',padding:'1%',fontWeight:'bold'}}/>
+                                <div className="form-check" style={{ marginLeft: '5%', marginBottom: '2%' }}>
+                                    <input style={{ backgroundColor: "black" }} className="form-check-input" type="checkbox" id="flexCheckDefault" name="draftPublish" onChange={this.onToggle} />
+                                    <label className="form-check-label" htmlFor="flexCheckDefault">
+                                        Publish
+                                    </label>
+                                </div>
+                                <div style={{ marginLeft: '5%', }}>
+                                    <input type="submit" value="Submit" style={{ width: '100%', padding: '1%', fontWeight: 'bold' }} />
                                 </div>
                             </form>
                             <div className='xml-viewer'>

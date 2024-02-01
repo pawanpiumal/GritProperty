@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const errorFile = require('../../middleware/functions').errorFile
 const errorSQL = require('../../middleware/db').errorSQL
+const authenticate = require('../../middleware/functions').authenticate
 const router = express.Router()
 const config = require('../../config/keys')
 
@@ -582,7 +583,7 @@ getProperty = async (id, type) => {
     return (convert.json2xml(outerItem, { compact: true }))
 }
 
-getProperty(1845, 'residential_home').then(res=>console.log({res}))
+// getProperty(1845, 'residential_home').then(res=>console.log({res}))
 
 getReaAccessToken = async () => {
     let data = new FormData();
@@ -633,7 +634,7 @@ router.post('/export', async (req, res) => {
 
 })
 
-router.get('/', (req, res) => {
+router.get('/',(req, res) => {
     res.status(200).json({ msg: 'working' })
 })
 

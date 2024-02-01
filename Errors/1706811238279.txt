@@ -1,0 +1,1 @@
+"{\"code\":\"ER_PARSE_ERROR\",\"errno\":1064,\"sqlMessage\":\"You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '')' at line 1\",\"sqlState\":\"42000\",\"index\":0,\"sql\":\"SELECT * FROM errors')\"}"

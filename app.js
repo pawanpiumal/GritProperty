@@ -14,6 +14,9 @@ const port = 3000
 // Import routes
 const importProperty = require('./routes/api/importProperties')
 const exportProperty = require('./routes/api/exportProperties')
+const login = require('./routes/api/login')
+const database = require('./routes/api/database')
+
 
 app.use(cors())
 // middleware
@@ -67,6 +70,8 @@ connection.end()
 
 app.use("/api/postproperty", importProperty)
 app.use("/api/exportproperty", exportProperty)
+app.use("/api/login", login)
+app.use("/api/db", database)
 
 app.get('/',(req,res)=>{
     res.status(200).json({msg:"working"})
