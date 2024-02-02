@@ -6,7 +6,8 @@ import Header from './Components/Header/header';
 import Login from './Components/Login/Login'
 import NotFound from './Components/NotFound';
 import Error from './Components/Errors/Error';
-
+import Front from './Components/Front/Front';
+import Config from './Components/Config/Config';
 
 function App() {
   return (
@@ -15,10 +16,11 @@ function App() {
         <Header />
         <Routes>
           <Route path="/import" element={<Importproperty />} />
-          <Route exact path="/" element={<Login />} />
+          <Route exact path="/" element={<Front />} />
           <Route exact path="/login" element={<Login />} />
           <Route exact path="/errors" element={<Error />} />
           <Route path="/errors/:limit" element={<Error />} />
+          <Route path="/config" element={<Config />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div >

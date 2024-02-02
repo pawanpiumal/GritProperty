@@ -16,6 +16,7 @@ const importProperty = require('./routes/api/importProperties')
 const exportProperty = require('./routes/api/exportProperties')
 const login = require('./routes/api/login')
 const database = require('./routes/api/database')
+const config = require('./routes/api/config')
 
 
 app.use(cors())
@@ -72,6 +73,7 @@ app.use("/api/postproperty", importProperty)
 app.use("/api/exportproperty", exportProperty)
 app.use("/api/login", login)
 app.use("/api/db", database)
+app.use("/api/config", config)
 
 app.get('/',(req,res)=>{
     res.status(200).json({msg:"working"})

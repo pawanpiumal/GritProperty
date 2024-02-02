@@ -33,7 +33,7 @@ class Login extends Component {
                     title: 'Loggedin',
                     text: res.data.status
                 }).then(re => {
-                    // this.props.history('/import')
+                    this.props.history('/')
                 })
             }).catch(err => {
                 // console.error(err.response.data);

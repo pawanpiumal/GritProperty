@@ -65,7 +65,7 @@ class Error extends Component {
     }
 
     getData() {
-        let limit = this.props.params.limit ? this.props.params.limit : 1000
+        let limit = this.props.params.limit ? this.props.params.limit : 20
         const url = `http://${process.env.REACT_APP_BackURL}db/errors?limit=${limit}`
         axios.get(url, {
             headers: {
