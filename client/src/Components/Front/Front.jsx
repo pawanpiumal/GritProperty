@@ -59,7 +59,7 @@ class Front extends Component {
                         </Card>
                     </Col>
                     <Col>
-                        <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Config.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" onClick={e => this.reRoute('/Config')} >
+                        <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('configImage.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" onClick={e => this.reRoute('/Config')} >
                             {/* <Card.Header></Card.Header> */}
                             <Card.Body >
                                 <Card.Title> Config </Card.Title>
