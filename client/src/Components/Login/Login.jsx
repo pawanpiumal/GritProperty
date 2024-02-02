@@ -19,7 +19,7 @@ class Login extends Component {
         }
     }
     componentDidMount() {
-        if (localStorage.getItem('userToken') != "") {
+        if (localStorage.getItem('userToken') && localStorage.getItem('userToken') != "") {
             const decoded = jwtDecode(localStorage.getItem('userToken'))
             // console.log(decoded);
             axios.post(`http://${process.env.REACT_APP_LoginURL}`, {
