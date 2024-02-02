@@ -4,7 +4,7 @@
   "description": "Application to process REAXML files for Grit Property Group website.",
   "main": "app.js",
   "scripts": {
-    "start": "npm install && nod app.js",
+    "start": "npm install && node app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon app",
     "both": "nodemon app && cd client && npm start"
