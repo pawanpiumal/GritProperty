@@ -612,6 +612,7 @@ router.post('/export', async (req, res) => {
         propertyItem = await getProperty(req.body.post_id, req.body.post_type)
     }catch(err){
         errorSQL('Exporting property to REA.',{err})
+        errorFile(err,'Exporting property to REA.')
         res.status(400).json({status:"Error",msg:"Something went wrong."})
     }
     
