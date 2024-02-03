@@ -111,6 +111,8 @@ const checkAvailabilityFile = async (filename) => {
 }
 
 
+
+
 // https://stackoverflow.com/questions/55374755/node-js-axios-download-file-stream-and-writefile
 const downloadFile = async (fileUrl, filename) => {
     // var fileExt = url.split('.').pop()
@@ -174,6 +176,30 @@ const deleteFile = (filename) => {
         errorSQL("Move file to trash", err)
     })
 }
+
+const path = require("path");
+
+
+const deleteFileOn24Interval = ()=>{
+    fs.readdir('downloads/trash',(err,files)=>{
+        if(err){
+            errorSQL('Deleting files at midnight',err)
+        }
+
+        for (const file of files) {
+            fs.unlink(path.join('downloads/trash', file), (err) => {
+                if(err){
+                    errorSQL('Deleting files at midnight',err)
+                    console.log(err);
+                }
+            });
+          }
+
+    })
+}
+
+setInterval(deleteFileOn24Interval,1000*60*60*24)
+
 
 const fileOperation = async (url) => {
     if (url != "") {
