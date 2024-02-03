@@ -334,11 +334,11 @@ getProperty = async (id, type) => {
             }
         })
     }))
-
+    console.log(data['floorplans']);
     if (data['floorplans'].length != 0) {
         if (data['floorplans-2'].length != 0) {
-            let imageData1 = await getImageURL(data['floorplans']?.id)
-            let imageData2 = await getImageURL(data['floorplans-2']?.id)
+            let imageData1 = await getImageURL(data['floorplans'][0]?.id)
+            let imageData2 = await getImageURL(data['floorplans-2'][0]?.id)
             objects['floorplan'] = [{
                 '_attributes': {
                     'id': 1,
@@ -355,7 +355,7 @@ getProperty = async (id, type) => {
                 }
             }]
         } else {
-            let imageData1 = await getImageURL(data['floorplans']?.id)
+            let imageData1 = await getImageURL(data['floorplans'][0]?.id)
             objects['floorplan'] = {
                 '_attributes': {
                     'id': 1,
@@ -604,6 +604,8 @@ getReaAccessToken = async () => {
 
     return (token.data.access_token)
 }
+
+// getProperty(2303, 'residential_home')
 
 router.post('/export', async (req, res) => {
 
