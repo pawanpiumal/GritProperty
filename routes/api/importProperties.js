@@ -605,19 +605,17 @@ router.post('/', async (req, res) => {
             data: data
         };
 
-        axios.request(configReq)
-            .then((response) => {
-                // console.log(JSON.stringify(response.data));
-            })
-            .catch((error) => {
-                errorSQL("Upload Property", error)
-            });
+        await axios.request(configReq).then(res => {
+            // console.log(res);
+        }).catch((error) => {
+            errorSQL("Upload Property", error)
+        });
 
+        console.log(axreq);
         res.status(200).json({ result, item })
     } catch (err) {
         console.error({ err });
-        errorFile(err, "Uploading Property Try Catch")
-        errorSQL("Uploading Property Try Catch", err)
+        errorSQL("Uploading Property Try Catch", { err })
         res.status(400).json({ 'status': "Error Occured", msg: "Try again" })
     }
 })

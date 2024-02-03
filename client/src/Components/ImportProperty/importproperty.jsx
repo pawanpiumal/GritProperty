@@ -64,7 +64,7 @@ class importproperty extends Component {
             Swal.fire({
                 icon: 'success',
                 title: 'Uploaded',
-                text: res.data
+                text: res.data.item.meta.uniqueid+' uploaded.'
             })
             this.setState({
                 jsonResult: res.data
