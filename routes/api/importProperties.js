@@ -88,7 +88,7 @@ const updateImageDatabase = async () => {
 
 const checkAvailabilityFile = async (filename) => {
     var url = `${config.WPmediaURL}`
-
+    filename = filename.split('.')[0]
     var listRes = await axios.get(`${url}/?search=${filename}`).catch(err => {
         if (err.response?.data?.code != "rest_post_invalid_page_number") {
             errorSQL("Checking List of Media", err)
@@ -206,7 +206,7 @@ const fileOperation = async (url, filename = "") => {
         await downloadFile(url, filename)
         var fileId = await uploadFile(filename)
         deleteFile(filename)
-        await updateImageDatabase()
+        // await updateImageDatabase()
         // console.log({fileId})
         return fileId;
     } else {
@@ -386,15 +386,15 @@ router.post('/', async (req, res) => {
             var imagesArray = ""
         }
 
-        var statementOfInformationID = await fileOperation(getText(result.media?.attachment?._attributes?.url),`${getText(result.uniqueID)}-SOI`)
+        var statementOfInformationID = await fileOperation(getText(result.media?.attachment?._attributes?.url), `${getText(result.uniqueID)}-SOI`)
 
         var resultFloorPlanArray = result.objects?.floorplan
         if (resultFloorPlanArray) {
             if (Array.isArray(resultFloorPlanArray)) {
-                var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url),`${getText(result.uniqueID)}-Floorplan1`) }]
-                var floorplans2ID = [{ id: await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url),`${getText(result.uniqueID)}-Floorplan2`) }]
+                var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) }]
+                var floorplans2ID = [{ id: await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url), `${getText(result.uniqueID)}-Floorplan2`) }]
             } else {
-                var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray._attributes?.url),`${getText(result.uniqueID)}-Floorplan1`) }]
+                var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) }]
                 var floorplans2ID = ""
             }
         } else {
@@ -615,7 +615,8 @@ router.post('/', async (req, res) => {
 
         res.status(200).json({ result, item })
     } catch (err) {
-        errorFile(err,"Uploading Property Try Catch")
+        console.error({ err });
+        errorFile(err, "Uploading Property Try Catch")
         errorSQL("Uploading Property Try Catch", err)
         res.status(400).json({ 'status': "Error Occured", msg: "Try again" })
     }
