@@ -26,7 +26,7 @@ class Config extends Component {
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: err.response.data
+                text: err.response.data.msg
             })
         })
     }

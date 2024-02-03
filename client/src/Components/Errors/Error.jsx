@@ -4,6 +4,7 @@ import './datatable.css'
 import axios from 'axios';
 import Expand from './Expand';
 import { useParams } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function withParams(Component) {
     return props => <Component {...props} params={useParams()} />;
@@ -79,6 +80,11 @@ class Error extends Component {
             })
         }).catch(err => {
             // console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: err.response.data.msg
+            })
         })
 
     }

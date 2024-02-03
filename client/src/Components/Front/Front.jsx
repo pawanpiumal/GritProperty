@@ -49,7 +49,7 @@ class Front extends Component {
                         </Card>
                     </Col>
                     <Col>
-                        <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Error.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" onClick={e => this.reRoute('/errors')} >
+                        <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Error.webp')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" onClick={e => this.reRoute('/errors')} >
                             {/* <Card.Header></Card.Header> */}
                             <Card.Body >
                                 <Card.Title> Errors </Card.Title>
