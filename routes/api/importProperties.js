@@ -611,7 +611,6 @@ router.post('/', async (req, res) => {
             errorSQL("Upload Property", error)
         });
 
-        console.log(axreq);
         res.status(200).json({ result, item })
     } catch (err) {
         console.error({ err });
