@@ -8,7 +8,7 @@ class header extends Component {
         return (
             <div>
                 <nav id="header-nav-bar" className="navbar " style={{ backgroundImage: `url('/Header.jpg')`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover' }}>
-                    <Link href="/" style={{textDecoration:'none', width:'100%'}}>
+                    <Link to="/" style={{textDecoration:'none', width:'100%'}}>
                         <h1 className="navbar-title" onClick={() => this.props.history('/')} style={{ cursor: 'pointer' }}>Syntara Solutions</h1>
                     </Link>
                 </nav>
