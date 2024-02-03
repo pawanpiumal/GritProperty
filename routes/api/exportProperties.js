@@ -608,39 +608,43 @@ getReaAccessToken = async () => {
 // getProperty(2303, 'residential_home')
 
 router.post('/export', async (req, res) => {
+    if (req.body.publish != "true") {
+        return res.status(200).json({ "status": "success", msg: "Did not run." })
+    } else {
 
-    errorSQL('Publish request query', req.body)
-    try{
-        propertyItem = await getProperty(req.body.post_id, req.body.post_type)
-    }catch(err){
-        errorSQL('Exporting property to REA.',{err})
-        errorFile(err,'Exporting property to REA.')
-        res.status(400).json({status:"Error",msg:"Something went wrong."})
+
+        // errorSQL('Publish request query', req.body)
+        try {
+            propertyItem = await getProperty(req.body.post_id, req.body.post_type)
+        } catch (err) {
+            errorSQL('Exporting property to REA.', { err })
+            errorFile(err, 'Exporting property to REA.')
+            res.status(400).json({ status: "Error", msg: "Something went wrong." })
+        }
+
+
+        errorSQL('Publishing the property.', propertyItem)
+        errorSQL('Publishing the property.', [req.body.post_id, req.body.post_type])
+        // console.log(req.body);
+        await axios.request({
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: config.reaPublishURL,
+            headers: {
+                'Content-Type': 'text/xml',
+                'Authorization': `Bearer ${await getReaAccessToken()}`
+            },
+            data: `${propertyItem}`
+        }).then(result => {
+            errorSQL('REA Result', result.data)
+            res.status(200).json({ result: result.data })
+
+        }).catch((error) => {
+            errorSQL('Publishing the property.', error)
+            console.error({ error });
+            res.status(400).json({ error })
+        });
     }
-    
-
-    errorSQL('Publishing the property.', propertyItem)
-    errorSQL('Publishing the property.', [req.body.post_id, req.body.post_type])
-    // console.log(req.body);
-    await axios.request({
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: config.reaPublishURL,
-        headers: {
-            'Content-Type': 'text/xml',
-            'Authorization': `Bearer ${await getReaAccessToken()}`
-        },
-        data: `${propertyItem}`
-    }).then(result => {
-        errorSQL('REA Result', result.data)
-        res.status(200).json({ result: result.data })
-
-    }).catch((error) => {
-        errorSQL('Publishing the property.', error)
-        console.error({ error });
-        res.status(400).json({ error })
-    });
-
 
 })
 
