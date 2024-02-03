@@ -60,7 +60,7 @@ class importproperty extends Component {
                 "Content-Type": "application/xml"
             }
         }).then(res => {
-            console.log(res.data.item.meta.uniqueid);
+            // console.log(res.data.item.meta.uniqueid);
             Swal.fire({
                 icon: 'success',
                 title: 'Uploaded',

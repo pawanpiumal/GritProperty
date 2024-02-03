@@ -309,14 +309,15 @@ const CreateAgent = async (Agent) => {
         }
     })
     // if (AgentID != "") { return AgentID }
-
+    unique = unique != "" ? unique : uuidv4()
+    
     media = await fileOperation(media, unique)
     // console.log(media);
     var item = {
         title: name,
         status: "publish",
         meta: {
-            'uniquelistingagentid': unique != "" ? unique : uuidv4(),
+            'uniquelistingagentid': unique,
             'name': name,
             'mobile-number': telephone,
             'email': email,
@@ -614,7 +615,7 @@ router.post('/', async (req, res) => {
         res.status(200).json({ result, item })
     } catch (err) {
         console.error({ err });
-        errorSQL("Uploading Property Try Catch", { err:err.toString() })
+        errorSQL("Uploading Property Try Catch", { err: err.toString() })
         res.status(400).json({ 'status': "Error Occured", msg: "Try again" })
     }
 })
