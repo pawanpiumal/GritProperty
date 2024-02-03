@@ -294,12 +294,12 @@ const CreateAgent = async (Agent) => {
 
     var unique = getText(Agent.uniquelistingagentid)
     var name = getText(Agent.name)
-    var telephone = getText(Agent.telephone)
-    var email = getText(Agent.email)
-    var twitter = getText(Agent.twitterURL)
-    var facebook = getText(Agent.facebookURL)
-    var linkedIn = getText(Agent.linkedInURL)
-    var media = getText(Agent.media?.attachment?._attributes?.url)
+    // var telephone = getText(Agent.telephone)
+    // var email = getText(Agent.email)
+    // var twitter = getText(Agent.twitterURL)
+    // var facebook = getText(Agent.facebookURL)
+    // var linkedIn = getText(Agent.linkedInURL)
+    // var media = getText(Agent.media?.attachment?._attributes?.url)
 
     var AgentID = ""
     agentList.forEach(e => {
@@ -312,7 +312,7 @@ const CreateAgent = async (Agent) => {
 
     unique = (unique && unique != "") ? unique : uuidv4()
 
-    media = (media && media != "") ? await fileOperation(media, unique) : ""
+    // media = (media && media != "") ? await fileOperation(media, unique) : ""
     // console.log(media);
     var item = {
         title: name,
@@ -320,12 +320,12 @@ const CreateAgent = async (Agent) => {
         meta: {
             'uniquelistingagentid': unique,
             'name': name,
-            'mobile-number': telephone,
-            'email': email,
-            'twitterurl': twitter,
-            'facebook-url': facebook,
-            'linkedin-url': linkedIn,
-            'agent-photo': [{ id: media }]
+            // 'mobile-number': telephone,
+            // 'email': email,
+            // 'twitterurl': twitter,
+            // 'facebook-url': facebook,
+            // 'linkedin-url': linkedIn,
+            // 'agent-photo': [{ id: media }]
         }
     }
     // console.log(item.meta);
