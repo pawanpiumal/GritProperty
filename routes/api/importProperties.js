@@ -612,8 +612,8 @@ router.post('/', async (req, res) => {
     if (type != "propertyList" || (result.propertyList && Object.keys(result.propertyList).length == 1 && !Array.isArray(result.propertyList[Object.keys(result.propertyList)[0]]))) {
         try {
             // console.log();
-            [result, item] = await postProerty(result[Object.keys(result)[0]], type, req.query.status)
-            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." })
+            await postProerty(result[Object.keys(result)[0]], type, req.query.status)
+            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." ,result})
         } catch (err) {
             console.error({ err });
             errorSQL("Uploading Property Try Catch 1", { err: err })
@@ -627,7 +627,7 @@ router.post('/', async (req, res) => {
                 return (postProerty(e, Object.keys(result.propertyList)[0], req.query.status))
             }))
 
-            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." })
+            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." ,result})
         } catch (err) {
             console.error({ err });
             errorSQL("Uploading Property Try Catch 2", { err: err })
@@ -646,7 +646,7 @@ router.post('/', async (req, res) => {
                     }))
                 }
             }))
-            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." })
+            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." ,result})
         } catch (err) {
             console.error({ err });
             errorSQL("Uploading Property Try Catch 3", { err: err })
