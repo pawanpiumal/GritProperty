@@ -200,6 +200,7 @@ setInterval(deleteFileOn24Interval, 1000 * 60 * 60 * 24)
 const fileOperation = async (url, filename = "") => {
     if (url != "") {
         var filename = filename == "" ? url.split('/').pop() : filename + '.' + url.split('.').pop()
+        console.log(filename);
         await checkAvailabilityFile(filename)
         // await updateImageDatabase()
         await downloadFile(url, filename)
@@ -372,7 +373,7 @@ router.post('/', async (req, res) => {
         if (resultImgArray) {
             if (Array.isArray(resultImgArray)) {
                 var imagesArray = await Promise.all(resultImgArray.map(async element => {
-                    var id = await fileOperation(getText(element._attributes?.url),result.uniqueID)
+                    var id = await fileOperation(getText(element._attributes?.url),getText(result.uniqueID))
                     return { id }
                 }))
             } else {
