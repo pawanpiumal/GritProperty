@@ -76,10 +76,14 @@ class Error extends Component {
             // console.log(res);
             this.setState({
                 filterdData: res.data.rows,
-                originalData: res.data.rows
+                originalData: res.data.rows,
+                isLoading: false
             })
         }).catch(err => {
             // console.error(err);
+            this.setState({
+                isLoading: false
+            })
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
@@ -94,7 +98,8 @@ class Error extends Component {
 
         this.setState({
             filterdData: data,
-            originalData: data
+            originalData: data,
+            isLoading: true
         })
         this.getData()
     }
@@ -103,34 +108,45 @@ class Error extends Component {
     render() {
         return (
             <div>
-                <div id="search">
-                    <input
-                        name='filterText'
-                        id="search-input"
-                        type="text"
-                        placeholder="Filter table data..."
-                        value={this.state.filterText}
-                        onChange={this.handleInputChange}
-                    />
-                </div>
-                <div id='datatable'>
-                    <div id='datatable2'>
-                        <DataTable
-                            columns={columns}
-                            data={this.state.filterdData}
-                            direction="auto"
-                            expandOnRowClicked
-                            expandableRows
-                            fixedHeaderScrollHeight="300px"
-                            expandableRowsComponent={ExpandedComponent}
-                            highlightOnHover
-                            pagination
-                            responsive
-                            subHeaderAlign="right"
-                            subHeaderWrap
-                        />
-                    </div>
-                </div>
+                {
+                    this.state.isLoading ?
+                        <div className='loadblock'><div className="lds-facebook" ><div></div><div></div><div></div></div></div>
+                        :
+
+                        <div>
+
+
+
+                            <div id="search">
+                                <input
+                                    name='filterText'
+                                    id="search-input"
+                                    type="text"
+                                    placeholder="Filter table data..."
+                                    value={this.state.filterText}
+                                    onChange={this.handleInputChange}
+                                />
+                            </div>
+                            <div id='datatable'>
+                                <div id='datatable2'>
+                                    <DataTable
+                                        columns={columns}
+                                        data={this.state.filterdData}
+                                        direction="auto"
+                                        expandOnRowClicked
+                                        expandableRows
+                                        fixedHeaderScrollHeight="300px"
+                                        expandableRowsComponent={ExpandedComponent}
+                                        highlightOnHover
+                                        pagination
+                                        responsive
+                                        subHeaderAlign="right"
+                                        subHeaderWrap
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                }
             </div>
         );
     }
