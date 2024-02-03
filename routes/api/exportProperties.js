@@ -606,7 +606,8 @@ getReaAccessToken = async () => {
 }
 
 router.post('/export', async (req, res) => {
-
+    
+    errorSQL('Publish request query', req.body)
     propertyItem = await getProperty(req.body.post_id, req.body.post_type)
 
     errorSQL('Publishing the property.', propertyItem)

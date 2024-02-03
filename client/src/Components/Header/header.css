@@ -1,16 +1,18 @@
-#header-nav-bar{
+#header-nav-bar {
     background-color: #111111;
 }
-.navbar-title{
-    color: orangered;
+
+.navbar-title {
+    /* color: linear-gradient(343deg, rgba(255, 255, 255, 0.736) 0%, rgb(255, 255, 255) 20%, rgba(255, 255, 255, 0.932) 0%); */
     text-align: center;
     margin-top: 0px;
     padding: 2%;
-    background: linear-gradient(343deg, rgba(2, 0, 36, 0.7355392840730042) 0%, rgba(6, 38, 91, 0.7103292000393908) 20%, rgba(0, 212, 255, 0.9316177154455532) 100%);
-    background: rgb(2, 0, 36);
-
+    /* font-family: 'Copperplate','Lucida Console', 'Courier New', Courier, monospace; */
+    font-weight: 900;
+    transform: scale(1, 2);
 }
-.nav-link{
+
+.nav-link {
     text-decoration: none;
     color: gold;
 }
