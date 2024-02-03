@@ -143,27 +143,27 @@ getProperty = async (id, type) => {
         item['newConstruction'] = getZeroOne(data['new-or-established-nopackage'])
     }
 
-    var leadAgent = await axios.get(`${config.WPmainURL}agent/${data['lead-agent']}`).catch(err => {
-        errorSQL('Get lead agent', err)
-    })
-    var dualAgent = ""
-    if (data['dual-agent'] != "" && data['dual-agent'] != data['lead-agent']) {
-        var dualAgent = await axios.get(`${config.WPmainURL}agent/${data['dual-agent']}`).catch(err => {
-            errorSQL('Get dual agent', err)
-        })
-    }
+    // var leadAgent = await axios.get(`${config.WPmainURL}agent/${data['lead-agent']}`).catch(err => {
+    //     errorSQL('Get lead agent', err)
+    // })
+    // var dualAgent = ""
+    // if (data['dual-agent'] != "" && data['dual-agent'] != data['lead-agent']) {
+    //     var dualAgent = await axios.get(`${config.WPmainURL}agent/${data['dual-agent']}`).catch(err => {
+    //         errorSQL('Get dual agent', err)
+    //     })
+    // }
 
-    leadAgent = leadAgent.data.meta
-    dualAgent = dualAgent.data?.meta.name != "" ? dualAgent.data?.meta : ""
+    // leadAgent = leadAgent.data.meta
+    // dualAgent = dualAgent.data?.meta.name != "" ? dualAgent.data?.meta : ""
 
     item['listingAgent'] = []
-    if (leadAgent) {
+    if (data['lead-agent'] && data['lead-agent'] != "") {
         item['listingAgent'][0] = {
             '_attributes': {
                 'id': 1
             },
-            'uniqueListingAgentID': leadAgent.uniquelistingagentid,
-            'name': leadAgent.name,
+            // 'uniqueListingAgentID': leadAgent.uniquelistingagentid,
+            'name': data['lead-agent'],
             // 'telephone': {
             //     '_attributes': {
             //         'type': 'mobile'
@@ -186,13 +186,13 @@ getProperty = async (id, type) => {
         }
     }
 
-    if (dualAgent) {
+    if (data['dual-agent'] && data['dual-agent'] != "") {
         item['listingAgent'][1] = {
             '_attributes': {
                 'id': 2
             },
-            'uniqueListingAgentID': dualAgent?.uniquelistingagentid,
-            'name': dualAgent?.name,
+            // 'uniqueListingAgentID': dualAgent?.uniquelistingagentid,
+            'name': data['dual-agent'],
             // 'telephone': {
             //     '_attributes': {
             //         'type': 'mobile'
@@ -608,7 +608,7 @@ getReaAccessToken = async () => {
 router.post('/export', async (req, res) => {
 
     propertyItem = await getProperty(req.body.post_id, req.body.post_type)
-    
+
     errorSQL('Publishing the property.', propertyItem)
     errorSQL('Publishing the property.', [req.body.post_id, req.body.post_type])
     // console.log(req.body);
@@ -634,7 +634,7 @@ router.post('/export', async (req, res) => {
 
 })
 
-router.get('/',(req, res) => {
+router.get('/', (req, res) => {
     res.status(200).json({ msg: 'working' })
 })
 

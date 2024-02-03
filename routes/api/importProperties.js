@@ -260,7 +260,7 @@ const checkList = async (type, uniqueidToCheck) => {
     // console.log(postList);
     return (postId);
 }
-
+/*
 const CreateAgent = async (Agent) => {
 
     var geturl = `${config.WPmainURL}agent/?status=any&per_page=100&`
@@ -345,6 +345,7 @@ const CreateAgent = async (Agent) => {
     })
     return (agentID);
 }
+*/
 
 postProerty = async (result, type, reqStatus = "draft") => {
 
@@ -406,10 +407,10 @@ postProerty = async (result, type, reqStatus = "draft") => {
     var AgentArray = result.listingAgent
     if (AgentArray) {
         if (Array.isArray(AgentArray)) {
-            var leadAgentID = await CreateAgent(AgentArray[0])
-            var dualAgentID = await CreateAgent(AgentArray[1])
+            var leadAgentID = getText(AgentArray[0])
+            var dualAgentID = getText(AgentArray[1])
         } else {
-            var leadAgentID = await CreateAgent(AgentArray)
+            var leadAgentID = getText(AgentArray)
             var dualAgentID = ""
         }
     } else {
@@ -445,8 +446,8 @@ postProerty = async (result, type, reqStatus = "draft") => {
             "new-or-established-nopackage": getText(result.newConstruction) == 0 ? "false" : "true",
             "new-or-established-package": getText(result.newConstruction) == 0 ? "false" : "true",
 
-            "lead-agent": leadAgentID.toString(),
-            "dual-agent": dualAgentID.toString(),
+            "lead-agent": leadAgentID,
+            "dual-agent": dualAgentID,
 
             "rental-per-week": getText(result.rent),
             "rental-per-calendar-month": "",
@@ -613,7 +614,7 @@ router.post('/', async (req, res) => {
         try {
             // console.log();
             await postProerty(result[Object.keys(result)[0]], type, req.query.status)
-            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." ,result})
+            res.status(200).json({ 'status': "Success", msg: "Property Uploaded.", result })
         } catch (err) {
             console.error({ err });
             errorSQL("Uploading Property Try Catch 1", { err: err })
@@ -627,7 +628,7 @@ router.post('/', async (req, res) => {
                 return (postProerty(e, Object.keys(result.propertyList)[0], req.query.status))
             }))
 
-            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." ,result})
+            res.status(200).json({ 'status': "Success", msg: "Property Uploaded.", result })
         } catch (err) {
             console.error({ err });
             errorSQL("Uploading Property Try Catch 2", { err: err })
@@ -646,7 +647,7 @@ router.post('/', async (req, res) => {
                     }))
                 }
             }))
-            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." ,result})
+            res.status(200).json({ 'status': "Success", msg: "Property Uploaded.", result })
         } catch (err) {
             console.error({ err });
             errorSQL("Uploading Property Try Catch 3", { err: err })
