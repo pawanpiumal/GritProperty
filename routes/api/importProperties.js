@@ -200,7 +200,7 @@ setInterval(deleteFileOn24Interval, 1000 * 60 * 60 * 24)
 const fileOperation = async (url, filename = "") => {
     if (url != "") {
         var filename = filename == "" ? url.split('/').pop() : filename + '.' + url.split('.').pop()
-        console.log(filename);
+        // console.log(filename);
         await checkAvailabilityFile(filename)
         // await updateImageDatabase()
         await downloadFile(url, filename)
@@ -304,15 +304,15 @@ const CreateAgent = async (Agent) => {
     var AgentID = ""
     agentList.forEach(e => {
         if (e.unique == unique || e.name == name) {
-            AgentID = e.id,
-                unique = e.uniquelistingagentid
+            AgentID = e.id
+            unique = e.uniquelistingagentid
         }
     })
     // if (AgentID != "") { return AgentID }
 
     unique = (unique && unique != "") ? unique : uuidv4()
 
-    media = (media && media != "") ? await fileOperation(media, unique): ""
+    media = (media && media != "") ? await fileOperation(media, unique) : ""
     // console.log(media);
     var item = {
         title: name,
@@ -346,9 +346,7 @@ const CreateAgent = async (Agent) => {
     return (agentID);
 }
 
-postProerty = async (result,type, reqStatus= "draft") => {
-
-    result = result[type]
+postProerty = async (result, type, reqStatus = "draft") => {
 
     if (type == 'residential') {
         type = 'residential_home'
@@ -613,21 +611,50 @@ router.post('/', async (req, res) => {
 
     if (type != "propertyList" || (result.propertyList && Object.keys(result.propertyList).length == 1 && !Array.isArray(result.propertyList[Object.keys(result.propertyList)[0]]))) {
         try {
-            [result, item] = await postProerty(result, type, req.query.status)
-            res.status(200).json({ result, item })
+            // console.log();
+            [result, item] = await postProerty(result[Object.keys(result)[0]], type, req.query.status)
+            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." })
         } catch (err) {
             console.error({ err });
-            errorSQL("Uploading Property Try Catch", { err: err.toString() })
+            errorSQL("Uploading Property Try Catch 1", { err: err })
             res.status(400).json({ 'status': "Error Occured", msg: "Try again" })
         }
-    } else {
+    } else if (type == "propertyList" && result.propertyList && Object.keys(result.propertyList).length == 1 && Array.isArray(result.propertyList[Object.keys(result.propertyList)[0]])) {
         try {
-            res.status(400).json({ 'status': "Error Occured", msg: "Not Customized for PropertyList" }) 
+            resultArray = result.propertyList[Object.keys(result.propertyList)[0]]
+
+            Promise.all(await resultArray.map(e => {
+                return (postProerty(e, Object.keys(result.propertyList)[0], req.query.status))
+            }))
+
+            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." })
         } catch (err) {
             console.error({ err });
-            errorSQL("Uploading Property Try Catch", { err: err.toString() })
+            errorSQL("Uploading Property Try Catch 2", { err: err })
             res.status(400).json({ 'status': "Error Occured", msg: "Try again" })
         }
+    } else if (type == "propertyList" && result.propertyList && Object.keys(result.propertyList).length != 1) {
+        try {
+            typeArr = Object.keys(result.propertyList)
+            await Promise.all(typeArr.map(e => {
+                if (!Array.isArray(result.propertyList[e])) {
+                    item = result.propertyList[e]
+                    return (postProerty(item, e, req.query.status))
+                } else {
+                    Promise.all(result.propertyList[e].map(async e2 => {
+                        return (await postProerty(e2, e, req.query.status))
+                    }))
+                }
+            }))
+            res.status(200).json({ 'status': "Success", msg: "Property Uploaded." })
+        } catch (err) {
+            console.error({ err });
+            errorSQL("Uploading Property Try Catch 3", { err: err })
+            res.status(400).json({ 'status': "Error Occured", msg: "Try again" })
+        }
+        // if(Array.isArray(result.propertyList[Object.keys(result.propertyList)[0]]))
+    } else {
+        res.status(400).json({ 'status': "Error Occured", msg: "XML error." })
     }
 })
 

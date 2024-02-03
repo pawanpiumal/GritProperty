@@ -42,7 +42,7 @@ router.get('/errors', authenticate, async (req, res) => {
 
 const fs = require('fs')
 
-router.get('/errorFiles', async (req, res) => {
+router.get('/errorFiles', authenticate, async (req, res) => {
     if (req.query.limit) {
         limit = parseInt(req.query.limit)
     } else {

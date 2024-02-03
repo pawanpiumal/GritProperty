@@ -1,3 +1,4 @@
+
 /**
  * @param   int     $post_id    The ID of the post.
  * @param   WP_Post $post       The post object.
@@ -7,9 +8,19 @@ function wpse_185340_post_ping( $post_id, $post, $update) {
     //if ( $post->post_status === 'publish' ) { // Only fire when published
        if($post->post_type=='agent' && get_post_meta($post_id,'uniquelistingagentid',true) == ""){
 		   update_post_meta($post_id,'uniquelistingagentid',vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex(random_bytes(16)), 4)),'');
-	   }else{
+	   }
+	if($post->post_type=='residential_home' && get_post_meta($post_id,'uniqueid',true) == ""){
+		   update_post_meta($post_id,'uniqueid',vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex(random_bytes(16)), 4)),'');
+	   }
+	if($post->post_type=='residential_rental' && get_post_meta($post_id,'uniqueid',true) == ""){
+		   update_post_meta($post_id,'uniqueid',vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex(random_bytes(16)), 4)),'');
+	   }
+	if($post->post_type=='residential_land' && get_post_meta($post_id,'uniqueid',true) == ""){
+		   update_post_meta($post_id,'uniqueid',vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex(random_bytes(16)), 4)),'');
+	   }
+	if(get_post_meta($post_id,'publish-to-realestateau',true)=="true"){
 		wp_remote_post(
-            'http://34.228.13.110:3000/api/postproperty/as',
+            'http://34.228.13.110:3000/api/exportproperty/export',
             array(
 				'headers'=>array('Content-Type' => 'application/json' ),
                 // https://codex.wordpress.org/HTTP_API
@@ -21,9 +32,36 @@ function wpse_185340_post_ping( $post_id, $post, $update) {
                 ))
             )
         );
-		
-    }  
-	wp_remote_get('http://34.228.13.110:3000/api/postproperty/a');
+	}
+    //}  
+	//wp_remote_get('http://34.228.13.110:3000/api/postproperty/a');
 }
 
 add_action( 'wp_insert_post', 'wpse_185340_post_ping', 10,3 );
+
+
+function file_renamer( $filename ) {
+    $info = pathinfo( $filename );
+    $ext  = empty( $info['extension'] ) ? '' : '.' . $info['extension'];
+    $name = basename( $filename, $ext );
+
+
+    if( $post_id = array_key_exists("post_id", $_POST) ? $_POST["post_id"] : null) {
+        if($post = get_post($post_id)) {
+            return get_post_meta($post_id,'uniqueid',true) . $ext;
+        }
+    }
+    
+    $my_image_title = $post;
+    
+
+    $file['name'] = $my_image_title  . - uniqid() . $ext; // uniqid method
+    // $file['name'] = md5($name) . $ext; // md5 method
+    // $file['name'] = base64_encode($name) . $ext; // base64 method
+
+    return  $filename;
+
+
+  }
+add_filter( 'sanitize_file_name', 'file_renamer', 10, 1 ); 
+

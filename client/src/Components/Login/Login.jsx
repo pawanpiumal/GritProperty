@@ -61,12 +61,14 @@ class Login extends Component {
                 "password": this.state.password
             }).then(res => {
                 console.log(res);
+                localStorage.setItem('userToken', res.data.token)
                 Swal.fire({
                     icon: 'success',
                     title: 'Loggedin',
                     text: res.data.status
+                }).then(re => {
+                    this.props.history('/')
                 })
-                localStorage.setItem('userToken', res.data.token)
             }).catch(err => {
                 console.error(err.response.data);
                 Swal.fire({
