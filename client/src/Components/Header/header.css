@@ -6,6 +6,8 @@
     text-align: center;
     margin-top: 0px;
     padding: 2%;
+    background: linear-gradient(343deg, rgba(2, 0, 36, 0.7355392840730042) 0%, rgba(6, 38, 91, 0.7103292000393908) 20%, rgba(0, 212, 255, 0.9316177154455532) 100%);
+    background: rgb(2, 0, 36);
 
 }
 .nav-link{

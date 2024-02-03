@@ -407,10 +407,10 @@ postProerty = async (result, type, reqStatus = "draft") => {
     var AgentArray = result.listingAgent
     if (AgentArray) {
         if (Array.isArray(AgentArray)) {
-            var leadAgentID = getText(AgentArray[0])
-            var dualAgentID = getText(AgentArray[1])
+            var leadAgentID = getText(AgentArray[0].name)
+            var dualAgentID = getText(AgentArray[1].name)
         } else {
-            var leadAgentID = getText(AgentArray)
+            var leadAgentID = getText(AgentArray.name)
             var dualAgentID = ""
         }
     } else {
