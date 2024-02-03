@@ -8,6 +8,7 @@ import NotFound from './Components/NotFound';
 import Error from './Components/Errors/Error';
 import Front from './Components/Front/Front';
 import Config from './Components/Config/Config';
+import ErrorFiles from './Components/Errors/ErrorFiles';
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
           <Route exact path="/login" element={<Login />} />
           <Route exact path="/errors" element={<Error />} />
           <Route path="/errors/:limit" element={<Error />} />
+          <Route path="/errorFiles" element={<ErrorFiles />} />
+          <Route path="/errorFiles/:limit" element={<ErrorFiles />} />
           <Route path="/config" element={<Config />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

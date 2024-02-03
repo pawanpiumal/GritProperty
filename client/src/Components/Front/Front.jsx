@@ -52,7 +52,17 @@ class Front extends Component {
                         <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Error.webp')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" onClick={e => this.reRoute('/errors')} >
                             {/* <Card.Header></Card.Header> */}
                             <Card.Body >
-                                <Card.Title> Errors </Card.Title>
+                                <Card.Title> Errors SQL</Card.Title>
+                                <Card.Text style={{ height: '8rem' }}>
+                                </Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    <Col>
+                        <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('ErrorFile.webp')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" onClick={e => this.reRoute('/errorFiles')} >
+                            {/* <Card.Header></Card.Header> */}
+                            <Card.Body >
+                                <Card.Title> Errors Files </Card.Title>
                                 <Card.Text style={{ height: '8rem' }}>
                                 </Card.Text>
                             </Card.Body>

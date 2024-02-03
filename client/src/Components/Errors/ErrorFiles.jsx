@@ -10,15 +10,18 @@ function withParams(Component) {
     return props => <Component {...props} params={useParams()} />;
 }
 
+function toDate(date) {
+    return (new Date(parseInt(date))).toISOString()
+}
 const columns = [
     {
         name: 'Index',
-        selector: row => parseInt(row.id),
+        selector: row => parseInt(row.index),
         sortable: true,
         width: "10vw"
     },
     {
-        name: 'Place',
+        name: 'File Name',
         selector: row => row.place,
         sortable: true,
         width: "30vw"
@@ -31,7 +34,7 @@ const columns = [
     },
     {
         name: 'Time',
-        selector: row => row.time,
+        selector: row => toDate(row.place.split('.')),
         sortable: true,
         width: "30vw"
     }
@@ -39,7 +42,7 @@ const columns = [
 
 const ExpandedComponent = ({ data }) => <Expand data={data} />;
 
-class Error extends Component {
+class ErrorFiles extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -67,7 +70,7 @@ class Error extends Component {
 
     getData() {
         let limit = this.props.params.limit ? this.props.params.limit : 20
-        const url = `http://${process.env.REACT_APP_BackURL}db/errors?limit=${limit}`
+        const url = `http://${process.env.REACT_APP_BackURL}db/errorFiles?limit=${limit}`
         axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem("userToken")}`
@@ -148,4 +151,4 @@ class Error extends Component {
     }
 }
 
-export default withParams(Error);
+export default withParams(ErrorFiles);

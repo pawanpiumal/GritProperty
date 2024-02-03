@@ -74,7 +74,7 @@ class importproperty extends Component {
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: err.response.data
+                text: err.response.data.msg
             })
 
         }).finally(e => {
@@ -90,7 +90,7 @@ class importproperty extends Component {
             <div className='container'>
                 {
                     this.state.isLoading ?
-                        <div className='loadblock'><div className="lds-facebook" ><div></div><div></div><div></div></div></div>
+                        <div className='loadblock' style={{height:'100vh'}}><div className="lds-facebook" ><div></div><div></div><div></div></div></div>
                         :
                         <div>
                             <form onSubmit={this.handleSubmit}>
@@ -107,10 +107,10 @@ class importproperty extends Component {
                                     <input type="submit" value="Submit" style={{ width: '100%', padding: '1%', fontWeight: 'bold' }} />
                                 </div>
                             </form>
-                            <div className='xml-viewer'>
+                            <div className='xml-viewer' style={{ backgroundColor: "white", padding: '2rem' }}>
                                 <XMLViewer xml={`"${this.state.xml}"`} collapsible={true} />
                             </div>
-                            <div className='xml-viewer'>
+                            <div className='xml-viewer' style={{ backgroundColor: "white", padding: '2rem' }}>
                                 <ReactJson src={this.state.jsonResult} />
                             </div>
                         </div>

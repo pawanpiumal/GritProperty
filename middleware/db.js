@@ -6,29 +6,29 @@ const errorFile = require('./functions').errorFile
 // Create mySQL Connection
 const db = require('../config/keys');
 
-const errorSQL = function(place, error) {
+const errorSQL = function (place, error) {
     var connection = mysql.createConnection({
-        port:db.port,
+        port: db.port,
         user: db.username,
         password: db.password,
-        host:db.host,
-        database:db.db
+        host: db.host,
+        database: db.db
     });
-    
+
     if (place && error) {
-        connection.connect(function(err) {
+        connection.connect(function (err) {
             if (err) {
-                errorFile(JSON.stringify(error))
+                errorFile(JSON.stringify(error), 'MySQL Connection.')
             }
         });
 
         connection.query(`INSERT INTO errors(place,error) VALUES('${place}','${JSON.stringify(error)}')`, (error) => {
             if (error) {
-                errorFile(JSON.stringify(error))
+                errorFile(JSON.stringify(error), 'MySQL insert errors.')
             }
         })
 
         connection.end()
     }
 }
-module.exports = {errorSQL }
+module.exports = { errorSQL }

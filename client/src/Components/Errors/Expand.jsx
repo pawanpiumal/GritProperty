@@ -9,12 +9,14 @@ import Badge from 'react-bootstrap/Badge'
 import ReactJson from 'react-json-view';
 
 class Expand extends Component {
-    isJSON = (str) => {
+    isJSON = (json) => {
         try {
-            return (JSON.parse(str) && !!str);
-        } catch (e) {
-            return false;
-        }
+            var obj = JSON.parse(json)
+            if (obj && typeof obj === 'object' && obj !== null) {
+                return true
+            }
+        } catch (err) { }
+        return false
     }
     render() {
 
@@ -24,9 +26,11 @@ class Expand extends Component {
                     {this.props.data.place}
                 </Row>
                 <Row>
-                    {this.isJSON(this.props.data.error) ?
+                    {this.isJSON(this.props.data.error) != false ?
+
                         <ReactJson src={JSON.parse(this.props.data.error)} /> : this.props.data.error
                     }
+
                 </Row>
 
 

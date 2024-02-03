@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken')
 const config = require('../config/keys')
 
 module.exports = {
-    errorFile: (error) => {
-        fs.writeFile('./Errors/' + Date.now() + '.txt', JSON.stringify(error), (err) => {
+    errorFile: (error, place = "") => {
+        fs.writeFile('./Errors/' + Date.now() + '.txt', JSON.stringify({ place, error }), (err) => {
             if (err) console.log(err);
         });
     },
