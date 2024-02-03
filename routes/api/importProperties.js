@@ -370,28 +370,31 @@ router.post('/', async (req, res) => {
         }
 
         var resultImgArray = result.objects?.img
+
+        var idArray = ['m', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'aa', 'ab', 'ac', 'ad', 'ae', 'af', 'ag', 'ah', 'ai']
+
         if (resultImgArray) {
             if (Array.isArray(resultImgArray)) {
-                var imagesArray = await Promise.all(resultImgArray.map(async element => {
-                    var id = await fileOperation(getText(element._attributes?.url),getText(result.uniqueID))
+                var imagesArray = await Promise.all(resultImgArray.map(async (element, index) => {
+                    var id = await fileOperation(getText(element._attributes?.url), `${getText(result.uniqueID)}-${idArray[index]}`)
                     return { id }
                 }))
             } else {
-                var imagesArray = [{ id: await fileOperation(getText(resultImgArray._attributes?.url)) }]
+                var imagesArray = [{ id: await fileOperation(getText(resultImgArray._attributes?.url), `${getText(result.uniqueID)}-${idArray[0]}`) }]
             }
         } else {
             var imagesArray = ""
         }
 
-        var statementOfInformationID = await fileOperation(getText(result.media?.attachment?._attributes?.url))
+        var statementOfInformationID = await fileOperation(getText(result.media?.attachment?._attributes?.url),`${getText(result.uniqueID)}-SOI`)
 
         var resultFloorPlanArray = result.objects?.floorplan
         if (resultFloorPlanArray) {
             if (Array.isArray(resultFloorPlanArray)) {
-                var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url)) }]
-                var floorplans2ID = [{ id: await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url)) }]
+                var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url),`${getText(result.uniqueID)}-Floorplan1`) }]
+                var floorplans2ID = [{ id: await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url),`${getText(result.uniqueID)}-Floorplan2`) }]
             } else {
-                var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray._attributes?.url)) }]
+                var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray._attributes?.url),`${getText(result.uniqueID)}-Floorplan1`) }]
                 var floorplans2ID = ""
             }
         } else {
