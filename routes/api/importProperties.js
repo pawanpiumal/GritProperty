@@ -615,6 +615,7 @@ router.post('/', async (req, res) => {
 
         res.status(200).json({ result, item })
     } catch (err) {
+        errorFile(err,"Uploading Property Try Catch")
         errorSQL("Uploading Property Try Catch", err)
         res.status(400).json({ 'status': "Error Occured", msg: "Try again" })
     }
