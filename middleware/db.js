@@ -74,7 +74,7 @@ const uploadSQL = function (postID, postType, uploadID, xml) {
             }
         });
 
-        connection.query(`INSERT INTO uploads(uploadID) VALUES('${parseInt(postID)}','${postType}','${uploadID}','${xml}')`, (error) => {
+        connection.query(`INSERT INTO uploads(postID, postType,uploadID,xml) VALUES('${parseInt(postID)}','${postType}','${uploadID}','${xml}')`, (error) => {
             if (error) {
                 errorFile('MySQL insert errors.', JSON.stringify(error))
             }
