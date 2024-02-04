@@ -672,8 +672,55 @@ router.post('/', authenticate, async (req, res) => {
  * 
  */
 
-
 router.get('/', (req, res) => {
     res.status(200).json({ status: "Successful", msg: "Import API is working" })
 })
+
+// Create mySQL Connection
+const mysql = require('mysql2/promise');
+const db = require('../../config/keys');
+
+
+/**
+ * @api {get} api/postproperty/importSQL?limit=:limit Get the import details in the SQL database
+ * @apiName GetImportSQL
+ * @apiGroup Import
+ * 
+ * @apiQuery {Number} limit Number of imports required from the database.
+ * @apiUse Authorization
+ * @apiUse StatusMsg
+ * @apiSuccess {Object} rows The imports are attached in JSON format.
+ *  
+ * @apiUse ErrorStatusMsg
+ */
+
+router.get('/importSQL', autehnticate, async (req, res) => {
+    var connection = await mysql.createConnection({
+        port: db.port,
+        user: db.username,
+        password: db.password,
+        host: db.host,
+        database: db.db
+    });
+
+    if (req.query.limit) {
+        limit = parseInt(req.query.limit)
+    } else {
+        limit = 1000
+    }
+
+    const [rows, fields] = await connection.execute(`SELECT * FROM imports ORDER BY time DESC LIMIT 0,${limit}`).catch(err => {
+        if (err) {
+            // console.log({ err });
+            errorFile("SQL SELECT for Imports.", JSON.stringify(error))
+            res.status(400).json({ status: "Unsuccessful", msg: "Error reading data from the database." })
+        }
+    })
+
+    connection.end()
+
+    res.status(200).json({ status: "Successful", msg: "Imports are attached.", rows })
+
+})
+
 module.exports = router;

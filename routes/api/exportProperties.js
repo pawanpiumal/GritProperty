@@ -15,6 +15,9 @@ const authenticate = require('../../middleware/functions').authenticate
 const router = express.Router()
 const config = require('../../config/keys')
 
+
+const mysql = require('mysql2/promise');
+
 const xmlFormat = require('xml-formatter');
 
 getImageURL = async (id) => {
@@ -704,6 +707,50 @@ router.get('/uploaddetails', authenticate, async (req, res) => {
     });
 })
 
+// Create mySQL Connection
+const db = require('../../config/keys');
+
+/**
+ * @api {get} api/exportproperty/uploadSQL?limit=:limit Get the upload details in the SQL database
+ * @apiName GetUploadsSQL
+ * @apiGroup Export
+ * 
+ * @apiQuery {Number} limit Number of upload details required from the database.
+ * @apiUse Authorization
+ * @apiUse StatusMsg
+ * @apiSuccess {Object} rows The upload details are attached in JSON format.
+ *  
+ * @apiUse ErrorStatusMsg
+ */
+
+router.get('/uploadSQL', authenticate, async (req, res) => {
+    var connection = await mysql.createConnection({
+        port: db.port,
+        user: db.username,
+        password: db.password,
+        host: db.host,
+        database: db.db
+    });
+
+    if (req.query.limit) {
+        limit = parseInt(req.query.limit)
+    } else {
+        limit = 1000
+    }
+
+    const [rows, fields] = await connection.execute(`SELECT * FROM uploads ORDER BY time DESC LIMIT 0,${limit}`).catch(err => {
+        if (err) {
+            // console.log({ err });
+            errorFile("SQL SELECT for Uploads.", JSON.stringify(error))
+            res.status(400).json({ status: "Unsuccessful", msg: "Error reading data from the database." })
+        }
+    })
+
+    connection.end()
+
+    res.status(200).json({ status: "Successful", msg: "Uploads are attached.", rows })
+
+})
 
 
 
