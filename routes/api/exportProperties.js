@@ -625,7 +625,7 @@ router.post('/export', async (req, res) => {
         try {
             propertyItem = await getProperty(req.body.post_id, req.body.post_type)
         } catch (err) {
-            errorSQL('Creating the XML object.', { err })
+            errorSQL('Creating the XML object.', err)
             res.status(400).json({ status: "Unsuccessful", msg: "Error in getting the property from wordpress to XML object." })
         }
 

@@ -49,7 +49,7 @@ class Config extends Component {
             Swal.fire({
                 icon: 'success',
                 title: 'Uploaded',
-                text: res.data.status
+                text: res.data.msg
             })
         }).catch(err => {
             console.error(err);

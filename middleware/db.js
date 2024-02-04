@@ -22,7 +22,7 @@ const errorSQL = function (place, error) {
             }
         });
 
-        connection.query(`INSERT INTO errors(place,error) VALUES('${place}','${JSON.stringify(error)}')`, (error) => {
+        connection.query(`INSERT INTO errors(place,error) VALUES('${place}','${`${error}`.replace(/'/g, " ")}')`, (error) => {
             if (error) {
                 errorFile('MySQL insert errors.', JSON.stringify(error))
             }

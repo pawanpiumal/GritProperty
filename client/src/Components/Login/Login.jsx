@@ -30,8 +30,8 @@ class Login extends Component {
                 localStorage.setItem('userToken', res.data.token)
                 Swal.fire({
                     icon: 'success',
-                    title: 'Loggedin',
-                    text: res.data.status
+                    title: 'Successful',
+                    text: res.data.msg
                 }).then(re => {
                     this.props.history('/')
                 })
