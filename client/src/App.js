@@ -9,6 +9,8 @@ import Error from './Components/Errors/Error';
 import Front from './Components/Front/Front';
 import Config from './Components/Config/Config';
 import ErrorFiles from './Components/Errors/ErrorFiles';
+import Uploads from './Components/Datatable/Uploads';
+import Imports from './Components/Datatable/Imports';
 
 function App() {
   return (
@@ -23,6 +25,10 @@ function App() {
           <Route path="/errors/:limit" element={<Error />} />
           <Route path="/errorFiles" element={<ErrorFiles />} />
           <Route path="/errorFiles/:limit" element={<ErrorFiles />} />
+          <Route path="/uploads" element={<Uploads />} />
+          <Route path="/uploads/:limit" element={<Uploads />} />
+          <Route path="/imports/" element={<Imports />} />
+          <Route path="/imports/:limit" element={<Imports />} />
           <Route path="/config" element={<Config />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
