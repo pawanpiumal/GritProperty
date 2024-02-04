@@ -25,7 +25,7 @@ class Expand extends Component {
                 <Row>
                     {this.props.data.place}
                 </Row>
-                <Row>
+                <Row style={{overflowWrap:'anywhere'}}>
                     {this.isJSON(this.props.data.error) != false ?
 
                         <ReactJson src={JSON.parse(this.props.data.error)} /> : this.props.data.error

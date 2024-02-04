@@ -30,23 +30,23 @@ app.use(xmlparser())
 const db = require('./config/keys');
 
 var connection = mysql.createConnection({
-    port:db.port,
+    port: db.port,
     user: db.username,
     password: db.password,
-    host:db.host,
+    host: db.host,
 });
 
-connection.connect(function(err) {
+connection.connect(function (err) {
     if (err) {
         console.error('error connecting: ' + err.stack);
-        errorFile(err)
+        errorFile("Connection App.js", err)
         return;
     }
     console.log('connected as id ' + connection.threadId);
 });
 
 connection.query(`CREATE DATABASE IF NOT EXISTS ${db.db}`, (error, results, fields) => {
-    if (error) errorFile(error)
+    if (error) errorFile("Create Database", error)
 })
 
 connection.changeUser({ database: db.db }, (err) => {
@@ -62,10 +62,37 @@ connection.query('CREATE TABLE IF NOT EXISTS errors (\
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
     PRIMARY KEY (id));', (error, results, fields) => {
     if (error) {
-        errorFile(JSON.stringify(error))
+        errorFile("Create Table errors", JSON.stringify(error))
         console.error(error)
     }
 })
+
+connection.query('CREATE TABLE IF NOT EXISTS imports (\
+    id INT NOT NULL AUTO_INCREMENT,\
+    xml TEXT NOT NULL,\
+    json TEXT NOT NULL,\
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
+    PRIMARY KEY (id));', (error, results, fields) => {
+    if (error) {
+        errorFile("Create Table imports", JSON.stringify(error))
+        console.error(error)
+    }
+})
+
+connection.query('CREATE TABLE IF NOT EXISTS uploads (\
+    id INT NOT NULL AUTO_INCREMENT,\
+    postID INT NOT NULL,\
+    postType TEXT NOT NULL,\
+    uploadID TEXT NOT NULL,\
+    xml TEXT NOT NULL,\
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
+    PRIMARY KEY (id));', (error, results, fields) => {
+    if (error) {
+        errorFile("Create Table uploads", JSON.stringify(error))
+        console.error(error)
+    }
+})
+
 
 connection.end()
 
@@ -75,8 +102,8 @@ app.use("/api/login", login)
 app.use("/api/db", database)
 app.use("/api/config", config)
 
-app.get('/',(req,res)=>{
-    res.status(200).json({msg:"working"})
+app.get('/', (req, res) => {
+    res.status(200).json({ msg: "working" })
 })
 
 app.listen(port, () => {

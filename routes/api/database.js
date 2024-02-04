@@ -30,7 +30,7 @@ router.get('/errors', authenticate, async (req, res) => {
     const [rows, fields] = await connection.execute(`SELECT * FROM errors ORDER BY time DESC LIMIT 0,${limit}`).catch(err => {
         if (err) {
             console.log({ err });
-            errorFile(JSON.stringify(error), "SQL SELECT for Errors.")
+            errorFile("SQL SELECT for Errors.", JSON.stringify(error))
             res.status(400).json({ 'msg': "Error", 'error': err })
         }
     })

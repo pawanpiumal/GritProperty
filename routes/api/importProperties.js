@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const errorFile = require('../../middleware/functions').errorFile
 const errorSQL = require('../../middleware/db').errorSQL
+const importSQL = require('../../middleware/db').importSQL
 const authenticate = require('../../middleware/functions').authenticate
 const router = express.Router()
 const config = require('../../config/keys')
@@ -600,6 +601,7 @@ postProperty = async (result, type, reqStatus = "draft") => {
         errorSQL("Upload Property", error)
     });
 
+    importSQL(result, item)
     return ([result, item])
 }
 
@@ -661,7 +663,7 @@ router.post('/', authenticate, async (req, res) => {
 })
 
 router.get("/as", (req, res) => {
-    errorFile(JSON.stringify({ 'request': 'req' }), "Test")
+    errorFile(JSON.stringify("Test", { 'request': 'req' }))
     res.status(200).json({ s: "2" })
 })
 

@@ -8,6 +8,9 @@ const { v4: uuidv4 } = require('uuid');
 
 const errorFile = require('../../middleware/functions').errorFile
 const errorSQL = require('../../middleware/db').errorSQL
+
+const uploadSQL = require('../../middleware/db').uploadSQL
+
 const authenticate = require('../../middleware/functions').authenticate
 const router = express.Router()
 const config = require('../../config/keys')
@@ -579,7 +582,7 @@ getProperty = async (id, type) => {
         }
     }
     // console.log(xmlFormat(convert.json2xml(outerItem, { compact: true, trim: false })));
-    console.log();
+    // console.log();
     return (convert.json2xml(outerItem, { compact: true }))
 }
 
@@ -618,13 +621,13 @@ router.post('/export', async (req, res) => {
             propertyItem = await getProperty(req.body.post_id, req.body.post_type)
         } catch (err) {
             errorSQL('Exporting property to REA.', { err })
-            errorFile(err, 'Exporting property to REA.')
+            errorFile('Exporting property to REA.', err)
             res.status(400).json({ status: "Error", msg: "Something went wrong." })
         }
 
 
-        errorSQL('Publishing the property.', propertyItem)
-        errorSQL('Publishing the property.', [req.body.post_id, req.body.post_type])
+        // errorSQL('Publishing the property.', propertyItem)
+        // errorSQL('Publishing the property.', [req.body.post_id, req.body.post_type])
         // console.log(req.body);
         await axios.request({
             method: 'post',
@@ -636,7 +639,8 @@ router.post('/export', async (req, res) => {
             },
             data: `${propertyItem}`
         }).then(result => {
-            errorSQL('REA Result', result.data)
+            // errorSQL('REA Result', result.data)
+            uploadSQL(req.body.post_id, req.body.post_type, result.data.uploadId, propertyItem)
             res.status(200).json({ result: result.data })
 
         }).catch((error) => {
