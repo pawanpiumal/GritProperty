@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const errorFile = require('../../middleware/functions').errorFile
 const errorSQL = require('../../middleware/db').errorSQL
+const authenticate = require('../../middleware/functions').authenticate
 const router = express.Router()
 const config = require('../../config/keys')
 
@@ -347,7 +348,7 @@ const CreateAgent = async (Agent) => {
 }
 */
 
-postProerty = async (result, type, reqStatus = "draft") => {
+postProperty = async (result, type, reqStatus = "draft") => {
 
     if (type == 'residential') {
         type = 'residential_home'
@@ -602,7 +603,7 @@ postProerty = async (result, type, reqStatus = "draft") => {
     return ([result, item])
 }
 
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
     console.log({ "msg": "Request Recievied" });
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
 
@@ -613,7 +614,7 @@ router.post('/', async (req, res) => {
     if (type != "propertyList" || (result.propertyList && Object.keys(result.propertyList).length == 1 && !Array.isArray(result.propertyList[Object.keys(result.propertyList)[0]]))) {
         try {
             // console.log();
-            await postProerty(result[Object.keys(result)[0]], type, req.query.status)
+            await postProperty(result[Object.keys(result)[0]], type, req.query.status)
             res.status(200).json({ 'status': "Success", msg: "Property Uploaded.", result })
         } catch (err) {
             console.error({ err });
@@ -624,8 +625,8 @@ router.post('/', async (req, res) => {
         try {
             resultArray = result.propertyList[Object.keys(result.propertyList)[0]]
 
-            Promise.all(await resultArray.map(e => {
-                return (postProerty(e, Object.keys(result.propertyList)[0], req.query.status))
+            await Promise.all(await resultArray.map(e => {
+                return (postProperty(e, Object.keys(result.propertyList)[0], req.query.status))
             }))
 
             res.status(200).json({ 'status': "Success", msg: "Property Uploaded.", result })
@@ -640,10 +641,10 @@ router.post('/', async (req, res) => {
             await Promise.all(typeArr.map(e => {
                 if (!Array.isArray(result.propertyList[e])) {
                     item = result.propertyList[e]
-                    return (postProerty(item, e, req.query.status))
+                    return (postProperty(item, e, req.query.status))
                 } else {
                     Promise.all(result.propertyList[e].map(async e2 => {
-                        return (await postProerty(e2, e, req.query.status))
+                        return (await postProperty(e2, e, req.query.status))
                     }))
                 }
             }))

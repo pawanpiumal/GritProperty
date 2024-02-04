@@ -57,7 +57,8 @@ class importproperty extends Component {
         })
         axios.post(`http://${process.env.REACT_APP_NodeURL}?status=${this.state.draftPublish}`, `${this.state.xml}`, {
             headers: {
-                "Content-Type": "application/xml"
+                "Content-Type": "application/xml",
+                'Authorization': `bearer ${localStorage.getItem('userToken')}`
             }
         }).then(res => {
             // console.log(res.data.item.meta.uniqueid);
