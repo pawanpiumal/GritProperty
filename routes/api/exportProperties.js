@@ -652,10 +652,42 @@ router.post('/export', async (req, res) => {
 
 })
 
+/**
+ * @api {get} api/exportproperty Check if the ExportProperty API is working
+ * @apiName CheckExport
+ * @apiGroup Check
+ * 
+ * @apiUse StatusMsg
+ * 
+ */
+
 router.get('/', (req, res) => {
-    res.status(200).json({ msg: 'working' })
+    res.status(200).json({  status: "Successful", msg: "Export API is working" })
 })
 
+router.get('/uploaddetails', async (req, res) => {
+    if (!req.query.uploadid) {
+        return res.status(400).json({ status: "Unsuccessful.", msg: "Upload ID is not specified." })
+    }
+
+    await axios.request({
+        method: 'GET',
+        maxBodyLength: Infinity,
+        url: `${config.reaPublishURL}/${req.query.uploadid}`,
+        headers: {
+            'Authorization': `Bearer ${await getReaAccessToken()}`
+        }
+    }).then(result => {
+        // errorSQL('REA Result', result.data)
+        // uploadSQL(req.body.post_id, req.body.post_type, result.data.uploadId, propertyItem)
+        res.status(200).json({ result: result.data })
+
+    }).catch((error) => {
+        errorSQL('Getting the upload details.', error)
+        console.error({ error });
+        res.status(400).json({ error })
+    });
+})
 
 
 

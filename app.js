@@ -93,7 +93,6 @@ connection.query('CREATE TABLE IF NOT EXISTS uploads (\
     }
 })
 
-
 connection.end()
 
 app.use("/api/postproperty", importProperty)
@@ -102,8 +101,26 @@ app.use("/api/login", login)
 app.use("/api/db", database)
 app.use("/api/config", config)
 
-app.get('/', (req, res) => {
-    res.status(200).json({ msg: "working" })
+
+/**
+ * @apiDefine StatusMsg
+ * 
+ * @apiSuccess {String} status Whether the REST request is successful or unsuccessful
+ * @apiSuccess {String} msg Message explaining the request results
+ */
+
+
+/**
+ * @api {get} / Check if the API is working
+ * @apiName CheckServer
+ * @apiGroup Check
+ * 
+ * @apiUse StatusMsg
+ * 
+ */
+
+app.get('//', (req, res) => {
+    res.status(200).json({ status: "Successful", msg: "Rest API is working" })
 })
 
 app.listen(port, () => {

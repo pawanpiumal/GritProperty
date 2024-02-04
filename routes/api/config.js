@@ -45,9 +45,17 @@ router.post('/post', authenticate, bodyparser.text(), (req, res) => {
     }
 })
 
+/**
+ * @api {get} api/config Check if the Config API is working
+ * @apiName CheckConfig
+ * @apiGroup Check
+ * 
+ * @apiUse StatusMsg
+ * 
+ */
 
 router.get('/', (req, res) => {
-    res.status(200).json({ msg: "Config Working." })
+    res.status(200).json({ status: "Successful", msg: "Config API is working" })
 });
 
 

@@ -72,9 +72,17 @@ router.get('/errorFiles', authenticate, async (req, res) => {
     }
 })
 
+/**
+ * @api {get} api/db Check if the DB API is working
+ * @apiName CheckDB
+ * @apiGroup Check
+ * 
+ * @apiUse StatusMsg
+ * 
+ */
 
 router.get('/', (req, res) => {
-    res.status(200).json({ "msg": 'DB working' })
+    res.status(200).json({  status: "Successful", msg: "Config API is working" })
 });
 
 module.exports = router;

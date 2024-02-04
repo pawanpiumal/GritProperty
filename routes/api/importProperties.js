@@ -662,13 +662,17 @@ router.post('/', authenticate, async (req, res) => {
     }
 })
 
-router.get("/as", (req, res) => {
-    errorFile(JSON.stringify("Test", { 'request': 'req' }))
-    res.status(200).json({ s: "2" })
-})
+/**
+ * @api {get} api/postproperty Check if the ImportProperty API is working
+ * @apiName CheckImport
+ * @apiGroup Check
+ * 
+ * @apiUse StatusMsg
+ * 
+ */
 
 
 router.get('/', (req, res) => {
-    res.status(200).json({ msg: "Post Property Working." })
+    res.status(200).json({ status: "Successful", msg: "Import API is working"  })
 })
 module.exports = router;
