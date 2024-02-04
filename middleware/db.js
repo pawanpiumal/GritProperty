@@ -48,7 +48,7 @@ const importSQL = function (xml, json) {
             }
         });
 
-        connection.query(`INSERT INTO imports(xml,json) VALUES('${xml}','${JSON.stringify(json)}')`, (error) => {
+        connection.query(`INSERT INTO imports(xml,json) VALUES('${JSON.stringify(xml)}','${JSON.stringify(json)}')`, (error) => {
             if (error) {
                 errorFile('MySQL insert errors.', JSON.stringify(error))
             }

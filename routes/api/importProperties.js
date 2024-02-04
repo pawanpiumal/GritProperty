@@ -606,7 +606,16 @@ postProperty = async (result, type, reqStatus = "draft") => {
 
 router.post('/', authenticate, async (req, res) => {
     console.log({ "msg": "Request Recievied" });
-    var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
+
+    if (!req.rawBody || req.rawBody == "") {
+        return (res.status(400).json({ status: "Unsuccessful", msg: "XML is not provided." }))
+    }
+    try {
+        var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
+    } catch (err) {
+        errorSQL("Import Parsing the XML to JSON.", err)
+        return res.status(400).json({ status: "Unsuccessful", msg: "Invalid XML object." })
+    }
 
     var type = Object.keys(result)[0]
 
