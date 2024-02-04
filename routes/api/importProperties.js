@@ -694,7 +694,7 @@ const db = require('../../config/keys');
  * @apiUse ErrorStatusMsg
  */
 
-router.get('/importSQL', autehnticate, async (req, res) => {
+router.get('/importSQL', authenticate, async (req, res) => {
     var connection = await mysql.createConnection({
         port: db.port,
         user: db.username,
