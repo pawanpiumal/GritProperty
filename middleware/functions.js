@@ -4,7 +4,8 @@ const config = require('../config/keys')
 
 module.exports = {
     errorFile: (place, error) => {
-        fs.writeFile('./Errors/' + `${Date.now()}.${place}` + '.txt', JSON.stringify({ place, error: `${error}` }), (err) => {
+        console.log({es:error});
+        fs.writeFileSync('./Errors/' + `${Date.now()}.${place}` + '.txt', `${JSON.stringify({ place, error: `${error}` })}`, (err) => {
             if (err) console.log(err);
         });
     },

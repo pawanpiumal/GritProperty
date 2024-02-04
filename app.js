@@ -38,7 +38,7 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) {
-        console.error('error connecting: ' + err.stack);
+        // console.error('error connecting: ' + err.stack);
         errorFile("Connection App.js", err)
         return;
     }
