@@ -38,7 +38,6 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) {
-        // console.error('error connecting: ' + err.stack);
         errorFile("Connection App.js", err)
         return;
     }
@@ -63,7 +62,6 @@ connection.query('CREATE TABLE IF NOT EXISTS errors (\
     PRIMARY KEY (id));', (error, results, fields) => {
     if (error) {
         errorFile("Create Table errors", JSON.stringify(error))
-        console.error(error)
     }
 })
 
@@ -75,7 +73,6 @@ connection.query('CREATE TABLE IF NOT EXISTS imports (\
     PRIMARY KEY (id));', (error, results, fields) => {
     if (error) {
         errorFile("Create Table imports", JSON.stringify(error))
-        console.error(error)
     }
 })
 
@@ -89,7 +86,6 @@ connection.query('CREATE TABLE IF NOT EXISTS uploads (\
     PRIMARY KEY (id));', (error, results, fields) => {
     if (error) {
         errorFile("Create Table uploads", JSON.stringify(error))
-        console.error(error)
     }
 })
 
@@ -105,10 +101,24 @@ app.use("/api/config", config)
 /**
  * @apiDefine StatusMsg
  * 
- * @apiSuccess {String} status Whether the REST request is successful or unsuccessful
- * @apiSuccess {String} msg Message explaining the request results
+ * @apiSuccess {String="Successful"} status REST request is successful.
+ * @apiSuccess {String} msg Message explaining the request results.
  */
 
+/**
+ * @apiDefine Authorization
+ * 
+ * @apiHeader {String} authorization Users JWT bearer token.
+ * @apiError (Not Authorized 401) {String="Unsuccessful"} status REST request is unsuccessful.
+ * @apiError (Not Authorized 401) {String} msg REST Message explaining the request results.
+ */
+
+/**
+ * @apiDefine ErrorStatusMsg
+ * 
+ * @apiError (Bad Request 400) {String="Unsuccessful"} status REST request is unsuccessful.
+ * @apiError (Bad Request 400) {String} msg Message explaining the request results.
+ */
 
 /**
  * @api {get} / Check if the API is working

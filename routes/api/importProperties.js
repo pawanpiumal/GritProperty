@@ -83,9 +83,7 @@ const updateImageDatabase = async () => {
 
 */
 
-// updateImageDatabase().then(res=>{
-//     console.log(imageDatabase);
-// })
+// updateImageDatabase()
 
 
 const checkAvailabilityFile = async (filename) => {
@@ -99,14 +97,12 @@ const checkAvailabilityFile = async (filename) => {
 
     listRes.data.forEach(async e => {
         var deleteURL = `${url}/${e.id}?force=true`
-        // console.log(deleteURL);
         await axios.delete(deleteURL, {
             headers: {
                 'Authorization': `Basic ${config.WPAuthorization}`
             }
         }).catch(err2 => {
             errorSQL("Delete existing media", err2)
-            // console.log(err2)
         })
     })
 }
@@ -161,7 +157,6 @@ const uploadFile = async (filename) => {
     };
     await axios.postForm(`${config.WPmediaURL}`, form, request_config).then(res => {
         fileid = res.data.id
-        // console.log({fileid})
     }).catch(err => {
         console.error(err)
         errorSQL("Upload Image to WP", err)
@@ -188,7 +183,6 @@ const deleteFileOn24Interval = () => {
             fs.unlink(path.join('downloads/trash', file), (err) => {
                 if (err) {
                     errorSQL('Deleting files at midnight', err)
-                    console.log(err);
                 }
             });
         }
@@ -202,14 +196,12 @@ setInterval(deleteFileOn24Interval, 1000 * 60 * 60 * 24)
 const fileOperation = async (url, filename = "") => {
     if (url != "") {
         var filename = filename == "" ? url.split('/').pop() : filename + '.' + url.split('.').pop()
-        // console.log(filename);
         await checkAvailabilityFile(filename)
         // await updateImageDatabase()
         await downloadFile(url, filename)
         var fileId = await uploadFile(filename)
         deleteFile(filename)
         // await updateImageDatabase()
-        // console.log({fileId})
         return fileId;
     } else {
         return ""
@@ -248,7 +240,6 @@ const checkList = async (type, uniqueidToCheck) => {
     }
 
 
-    // console.log(postList)
     var postId = ""
     for (let index = 0; index < postList.length; index++) {
         const element = postList[index];
@@ -258,8 +249,6 @@ const checkList = async (type, uniqueidToCheck) => {
             break
         }
     }
-    // console.log(postId);
-    // console.log(postList);
     return (postId);
 }
 /*
@@ -315,7 +304,6 @@ const CreateAgent = async (Agent) => {
     unique = (unique && unique != "") ? unique : uuidv4()
 
     // media = (media && media != "") ? await fileOperation(media, unique) : ""
-    // console.log(media);
     var item = {
         title: name,
         status: "publish",
@@ -330,7 +318,6 @@ const CreateAgent = async (Agent) => {
             // 'agent-photo': [{ id: media }]
         }
     }
-    // console.log(item.meta);
     const postURL = `${config.WPmainURL}agent/${AgentID}`
     var agentID = ""
     await axios.post(postURL, JSON.stringify(item), {
@@ -342,7 +329,6 @@ const CreateAgent = async (Agent) => {
         agentID = res2.data.id;
     }).catch(err => {
         errorSQL("Upload/Update Agent", err)
-        console.log(err);
         agentID = ""
     })
     return (agentID);
@@ -581,9 +567,7 @@ postProperty = async (result, type, reqStatus = "draft") => {
 
     let data = JSON.stringify(item);
     let postId = await checkList(type, item.meta.uniqueid)
-    // console.log(postId);
     let restURL = `${config.WPmainURL}${type}/${postId != "" ? postId : ""}`
-    // console.log(restURL);
     let configReq = {
         method: 'post',
         maxBodyLength: Infinity,
@@ -596,7 +580,6 @@ postProperty = async (result, type, reqStatus = "draft") => {
     };
 
     await axios.request(configReq).then(res => {
-        // console.log(res);
     }).catch((error) => {
         errorSQL("Upload Property", error)
     });
@@ -605,23 +588,35 @@ postProperty = async (result, type, reqStatus = "draft") => {
     return ([result, item])
 }
 
+/**
+ * @api {get} api/postproperty Upload property to wordpress.
+ * @apiName import
+ * @apiGroup Import
+ * 
+ * @apiUse Authorization
+ * 
+ * @apiHeader {String} Content-Type application/xml is required for this request.
+ * @apiBody {String} Body XML object
+ * 
+ * @apiUse StatusMsg
+ * @apiUse ErrorStatusMsg
+ * @apiSuccess {Object} result The resulting JSON object when XML input is parsed.
+ */
+
+
 router.post('/', authenticate, async (req, res) => {
     console.log({ "msg": "Request Recievied" });
     var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
 
     var type = Object.keys(result)[0]
 
-    // res.status(200).json({ "s": (result.propertyList && Object.keys(result.propertyList).length == 1 && !Array.isArray(result.propertyList[Object.keys(result.propertyList)[0]])), result, msg: "PostProperty working." })
-
     if (type != "propertyList" || (result.propertyList && Object.keys(result.propertyList).length == 1 && !Array.isArray(result.propertyList[Object.keys(result.propertyList)[0]]))) {
         try {
-            // console.log();
             await postProperty(result[Object.keys(result)[0]], type, req.query.status)
-            res.status(200).json({ 'status': "Success", msg: "Property Uploaded.", result })
+            res.status(200).json({ status: "Successful", msg: "Property Uploaded.", result })
         } catch (err) {
-            console.error({ err });
-            errorSQL("Uploading Property Try Catch 1", { err: err })
-            res.status(400).json({ 'status': "Error Occured", msg: "Try again" })
+            errorSQL("Uploading Property Try Catch 1 (No Property List/ Single Object)", { err: err })
+            res.status(400).json({ status: "Unsuccessful", msg: "Error uploading the property." })
         }
     } else if (type == "propertyList" && result.propertyList && Object.keys(result.propertyList).length == 1 && Array.isArray(result.propertyList[Object.keys(result.propertyList)[0]])) {
         try {
@@ -631,11 +626,10 @@ router.post('/', authenticate, async (req, res) => {
                 return (postProperty(e, Object.keys(result.propertyList)[0], req.query.status))
             }))
 
-            res.status(200).json({ 'status': "Success", msg: "Property Uploaded.", result })
+            res.status(200).json({ status: "Successful", msg: "Property Uploaded.", result })
         } catch (err) {
-            console.error({ err });
-            errorSQL("Uploading Property Try Catch 2", { err: err })
-            res.status(400).json({ 'status': "Error Occured", msg: "Try again" })
+            errorSQL("Uploading Property Try Catch 2 (Property List/ Single Type/ Multiple objects)", { err: err })
+            res.status(400).json({ status: "Unsuccessful", msg: "Error uploading the property." })
         }
     } else if (type == "propertyList" && result.propertyList && Object.keys(result.propertyList).length != 1) {
         try {
@@ -650,15 +644,13 @@ router.post('/', authenticate, async (req, res) => {
                     }))
                 }
             }))
-            res.status(200).json({ 'status': "Success", msg: "Property Uploaded.", result })
+            res.status(200).json({ status: "Successful", msg: "Property Uploaded.", result })
         } catch (err) {
-            console.error({ err });
-            errorSQL("Uploading Property Try Catch 3", { err: err })
-            res.status(400).json({ 'status': "Error Occured", msg: "Try again" })
+            errorSQL("Uploading Property Try Catch 3 (Property List/ Multiple Types)", { err: err })
+            res.status(400).json({ status: "Unsuccessful", msg: "Error uploading the property." })
         }
-        // if(Array.isArray(result.propertyList[Object.keys(result.propertyList)[0]]))
     } else {
-        res.status(400).json({ 'status': "Error Occured", msg: "XML error." })
+        res.status(400).json({ status: "Unsuccessful", msg: "Invalid XML provided." })
     }
 })
 
@@ -673,6 +665,6 @@ router.post('/', authenticate, async (req, res) => {
 
 
 router.get('/', (req, res) => {
-    res.status(200).json({ status: "Successful", msg: "Import API is working"  })
+    res.status(200).json({ status: "Successful", msg: "Import API is working" })
 })
 module.exports = router;

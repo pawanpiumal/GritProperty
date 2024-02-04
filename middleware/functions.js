@@ -4,7 +4,6 @@ const config = require('../config/keys')
 
 module.exports = {
     errorFile: (place, error) => {
-        console.log({es:error});
         fs.writeFileSync('./Errors/' + `${Date.now()}.${place}` + '.txt', `${JSON.stringify({ place, error: `${error}` })}`, (err) => {
             if (err) console.log(err);
         });
@@ -18,13 +17,13 @@ module.exports = {
             req.token = bearerToken;
             jwt.verify(req.token, config.jwtSecret, (err, authData) => {
                 if (err) {
-                    res.status(403).json({ status: "Token Expired.", msg: "Login again." })
+                    res.status(401).json({ status: "Unsuccessful", msg: "Relogin to use this service." })
                 } else {
                     next()
                 }
             })
         } else {
-            res.status(403).json({ status: "Token Expired", msg: "Re-Login." });
+            res.status(401).json({ status: "Unsuccessful", msg: "User Token is required for this action." });
         }
     }
 

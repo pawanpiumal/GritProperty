@@ -23,13 +23,11 @@ getImageURL = async (id) => {
     var item = ""
     if (id) {
         item = await axios.get(url).catch(err => {
-            console.log(err);
             errorSQL('Get media URL', err)
         })
     }
     return (item.data?.source_url);
 }
-// getImageURL(1532)
 
 getZeroOne = (string) => {
     if (string == 'false') {
@@ -61,11 +59,9 @@ getProperty = async (id, type) => {
         }
     }).catch(err => {
         errorSQL('getExportData', err)
-        console.error(err);
     })
 
 
-    // console.log(rest.data);
     var data = rest.data.meta
 
     item = {}
@@ -337,7 +333,7 @@ getProperty = async (id, type) => {
             }
         })
     }))
-    console.log(data['floorplans']);
+
     if (data['floorplans'].length != 0) {
         if (data['floorplans-2'].length != 0) {
             let imageData1 = await getImageURL(data['floorplans'][0]?.id)
@@ -581,12 +577,9 @@ getProperty = async (id, type) => {
             "": innerItem
         }
     }
-    // console.log(xmlFormat(convert.json2xml(outerItem, { compact: true, trim: false })));
-    // console.log();
+
     return (convert.json2xml(outerItem, { compact: true }))
 }
-
-// getProperty(1845, 'residential_home').then(res=>console.log({res}))
 
 getReaAccessToken = async () => {
     let data = new FormData();
@@ -608,27 +601,38 @@ getReaAccessToken = async () => {
     return (token.data.access_token)
 }
 
-// getProperty(2303, 'residential_home')
+/**
+ * @api {post} api/exportproperty/export Export Property to Realestate.com.au
+ * @apiName export
+ * @apiGroup Export
+ * 
+ * @apiUse Authorization
+ * @apiBody {Number} post_id The wordpress post ID that needs to be exported.
+ * @apiBody {String="Residential_Home","Residential_Rental","Residential_Land"} post_type Property type of the property that needs to be exportd.
+ * @apiBody {String="true","false"} publish Whether to publish the property to Realestate site or not.
+ * @apiUse StatusMsg
+ * @apiUse ErrorStatusMsg
+ * @apiSuccess {string} uploadId UploadId from realestate.com.au which is used to track the upload progress.
+ */
+
 
 router.post('/export', async (req, res) => {
     if (req.body.publish != "true") {
-        return res.status(200).json({ "status": "success", msg: "Did not run." })
+        return res.status(200).json({ status: "Successful", msg: "Did not published in Realestate.com.au." })
     } else {
-
 
         // errorSQL('Publish request query', req.body)
         try {
             propertyItem = await getProperty(req.body.post_id, req.body.post_type)
         } catch (err) {
-            errorSQL('Exporting property to REA.', { err })
-            errorFile('Exporting property to REA.', err)
-            res.status(400).json({ status: "Error", msg: "Something went wrong." })
+            errorSQL('Creating the XML object.', { err })
+            res.status(400).json({ status: "Unsuccessful", msg: "Error in getting the property from wordpress to XML object." })
         }
 
 
         // errorSQL('Publishing the property.', propertyItem)
         // errorSQL('Publishing the property.', [req.body.post_id, req.body.post_type])
-        // console.log(req.body);
+
         await axios.request({
             method: 'post',
             maxBodyLength: Infinity,
@@ -641,12 +645,11 @@ router.post('/export', async (req, res) => {
         }).then(result => {
             // errorSQL('REA Result', result.data)
             uploadSQL(req.body.post_id, req.body.post_type, result.data.uploadId, propertyItem)
-            res.status(200).json({ result: result.data })
+            res.status(200).json({ status: "Successful", msg: "Uploaded to realestate.com.au", uploadId: result.data.uploadId })
 
         }).catch((error) => {
             errorSQL('Publishing the property.', error)
-            console.error({ error });
-            res.status(400).json({ error })
+            res.status(400).json({ status: "Unsuccessful", msg: "Error occured while uploading the property to realestate.com.au" })
         });
     }
 
@@ -662,10 +665,25 @@ router.post('/export', async (req, res) => {
  */
 
 router.get('/', (req, res) => {
-    res.status(200).json({  status: "Successful", msg: "Export API is working" })
+    res.status(200).json({ status: "Successful", msg: "Export API is working" })
 })
 
-router.get('/uploaddetails', async (req, res) => {
+
+/**
+ * @api {get} api/exportproperty/uploaddetails?uploadid=:uploadid Get upload details using the uploadid from realestate.com.au
+ * @apiName uploadDetails
+ * @apiGroup Export
+ * 
+ * @apiUse Authorization
+ * 
+ * @apiquery {Number} uploadid The uploadId from realestate.com.au
+ * 
+ * @apiUse StatusMsg
+ * @apiUse ErrorStatusMsg
+ * @apiSuccess {Object} result Result JSON from realestate.com.au
+ */
+
+router.get('/uploaddetails', authenticate, async (req, res) => {
     if (!req.query.uploadid) {
         return res.status(400).json({ status: "Unsuccessful.", msg: "Upload ID is not specified." })
     }
@@ -678,14 +696,11 @@ router.get('/uploaddetails', async (req, res) => {
             'Authorization': `Bearer ${await getReaAccessToken()}`
         }
     }).then(result => {
-        // errorSQL('REA Result', result.data)
-        // uploadSQL(req.body.post_id, req.body.post_type, result.data.uploadId, propertyItem)
-        res.status(200).json({ result: result.data })
+        res.status(200).json({ status: "Successful", msg: "Results are attached.", result: result.data })
 
     }).catch((error) => {
         errorSQL('Getting the upload details.', error)
-        console.error({ error });
-        res.status(400).json({ error })
+        res.status(400).json({ status: "Unsuccessful", msg: "Error getting the upload details." })
     });
 })
 
