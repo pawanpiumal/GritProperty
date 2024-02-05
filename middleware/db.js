@@ -35,10 +35,12 @@ const errorSQL = async function (place, error) {
         });
 
         if (isJson(error)) {
-            error = JSON.stringify(error)
+            error = JSON.stringify(error).replace(/'/g, " ")
+        }else{
+            error = `${`${error}`.replace(/'/g, " ")}`
         }
 
-        await connection.query(`INSERT INTO errors(place,error) VALUES('${place}','${`${error}`.replace(/'/g, " ")}')`, (error) => {
+        await connection.query(`INSERT INTO errors(place,error) VALUES('${place}','${error}')`, (error) => {
             if (error) {
                 errorFile('MySQL insert errors.', JSON.stringify(error))
             }

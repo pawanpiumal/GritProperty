@@ -627,7 +627,7 @@ router.post('/export', async (req, res) => {
     } else {
 
         try {
-            let propertyItem = await getProperty(req.body.post_id, req.body.post_type)
+            const propertyItem = await getProperty(req.body.post_id, req.body.post_type)
 
             await axios.request({
                 method: 'post',
@@ -650,6 +650,7 @@ router.post('/export', async (req, res) => {
 
         } catch (err) {
             await errorSQL('Creating the XML object.', err)
+            errorFile('Creating the XML object', err)
             return res.status(400).json({ status: "Unsuccessful", msg: "Error in getting the property from wordpress to XML object." })
         }
 
