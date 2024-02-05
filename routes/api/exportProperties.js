@@ -626,36 +626,33 @@ router.post('/export', async (req, res) => {
         return res.status(200).json({ status: "Successful", msg: "Did not published in Realestate.com.au." })
     } else {
 
-        // errorSQL('Publish request query', req.body)
         try {
-            propertyItem = await getProperty(req.body.post_id, req.body.post_type)
+            let propertyItem = await getProperty(req.body.post_id, req.body.post_type)
+
+            await axios.request({
+                method: 'post',
+                maxBodyLength: Infinity,
+                url: config.reaPublishURL,
+                headers: {
+                    'Content-Type': 'text/xml',
+                    'Authorization': `Bearer ${await getReaAccessToken()}`
+                },
+                data: `${propertyItem}`
+            }).then(result => {
+                // errorSQL('REA Result', result.data)
+                uploadSQL(req.body.post_id, req.body.post_type, result.data.uploadId, propertyItem)
+                return res.status(200).json({ status: "Successful", msg: "Uploaded to realestate.com.au", uploadId: result.data.uploadId })
+
+            }).catch((error) => {
+                errorSQL('Publishing the property.', error)
+                return res.status(400).json({ status: "Unsuccessful", msg: "Error occured while uploading the property to realestate.com.au" })
+            });
+
         } catch (err) {
             errorSQL('Creating the XML object.', err)
-            res.status(400).json({ status: "Unsuccessful", msg: "Error in getting the property from wordpress to XML object." })
+            return res.status(400).json({ status: "Unsuccessful", msg: "Error in getting the property from wordpress to XML object." })
         }
 
-
-        // errorSQL('Publishing the property.', propertyItem)
-        // errorSQL('Publishing the property.', [req.body.post_id, req.body.post_type])
-
-        await axios.request({
-            method: 'post',
-            maxBodyLength: Infinity,
-            url: config.reaPublishURL,
-            headers: {
-                'Content-Type': 'text/xml',
-                'Authorization': `Bearer ${await getReaAccessToken()}`
-            },
-            data: `${propertyItem}`
-        }).then(result => {
-            // errorSQL('REA Result', result.data)
-            uploadSQL(req.body.post_id, req.body.post_type, result.data.uploadId, propertyItem)
-            res.status(200).json({ status: "Successful", msg: "Uploaded to realestate.com.au", uploadId: result.data.uploadId })
-
-        }).catch((error) => {
-            errorSQL('Publishing the property.', error)
-            res.status(400).json({ status: "Unsuccessful", msg: "Error occured while uploading the property to realestate.com.au" })
-        });
     }
 
 })
