@@ -311,11 +311,13 @@ getProperty = async (id, type) => {
 
     if (data['statement-of-information']) {
         item['media'] = {
-            '_attributes': {
-                'id': data['statement-of-information']?.id,
-                'usage': 'statementOfInformation',
-                'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
-                'url': await getImageURL(data['statement-of-information']?.id)
+            'attachment': {
+                '_attributes': {
+                    'id': data['statement-of-information']?.id,
+                    'usage': 'statementOfInformation',
+                    'modTime': new Date().toISOString().slice(0, 19).replace(/[^0-9T]/g, ""),
+                    'url': await getImageURL(data['statement-of-information']?.id)
+                }
             }
         }
     }
