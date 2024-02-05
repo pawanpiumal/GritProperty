@@ -27,7 +27,6 @@ class Front extends Component {
     render() {
         return (
             <Container>
-                <input type="button" value="Upload Status" />
                 <Row style={{ margin: '5%' }}>
                     <Col>
                         <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Login.jpg')` }} className="mb-2" onClick={e => this.reRoute('/login')} >

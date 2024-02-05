@@ -339,8 +339,8 @@ getProperty = async (id, type) => {
 
     if (data['floorplans'].length != 0) {
         if (data['floorplans-2'].length != 0) {
-            let imageData1 = await getImageURL(data['floorplans'][0]?.id)
-            let imageData2 = await getImageURL(data['floorplans-2'][0]?.id)
+            let imageData1 = await getImageURL(data['floorplans']?.id)
+            let imageData2 = await getImageURL(data['floorplans-2']?.id)
             objects['floorplan'] = [{
                 '_attributes': {
                     'id': 1,
@@ -357,7 +357,7 @@ getProperty = async (id, type) => {
                 }
             }]
         } else {
-            let imageData1 = await getImageURL(data['floorplans'][0]?.id)
+            let imageData1 = await getImageURL(data['floorplans']?.id)
             objects['floorplan'] = {
                 '_attributes': {
                     'id': 1,
