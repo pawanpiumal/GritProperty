@@ -18,7 +18,7 @@ const isJson = function (item) {
 }
 
 
-const errorSQL = function (place, error) {
+const errorSQL = async function (place, error) {
     var connection = mysql.createConnection({
         port: db.port,
         user: db.username,
@@ -38,7 +38,7 @@ const errorSQL = function (place, error) {
             error = JSON.stringify(error)
         }
 
-        connection.query(`INSERT INTO errors(place,error) VALUES('${place}','${`${error}`.replace(/'/g, " ")}')`, (error) => {
+        await connection.query(`INSERT INTO errors(place,error) VALUES('${place}','${`${error}`.replace(/'/g, " ")}')`, (error) => {
             if (error) {
                 errorFile('MySQL insert errors.', JSON.stringify(error))
             }
