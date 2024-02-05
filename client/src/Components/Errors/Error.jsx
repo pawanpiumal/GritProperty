@@ -15,25 +15,25 @@ const columns = [
         name: 'Index',
         selector: row => parseInt(row.id),
         sortable: true,
-        width: "10vw"
+        width: "6vw"
     },
     {
         name: 'Place',
         selector: row => row.place,
         sortable: true,
-        width: "30vw"
+        width: "28vw"
     },
     {
         name: 'Error',
         selector: row => row.error,
         sortable: true,
-        width: "30vw"
+        width: "28vw"
     },
     {
         name: 'Time',
         selector: row => row.time,
         sortable: true,
-        width: "30vw"
+        width: "28vw"
     }
 ]
 

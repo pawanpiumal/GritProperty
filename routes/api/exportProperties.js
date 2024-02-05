@@ -86,15 +86,15 @@ getProperty = async (id, type) => {
     }
 
     if (data['status'] == 'leased') {
-        item['soldDetails'] = {
-            'soldPrice': {
-                '_attributes': {
-                    'display': data['show_sale_price']
-                },
-                '_text': data['sale-price']
-            },
-            'soldDate': data['sale-date']
-        }
+        // item['soldDetails'] = {
+        //     'soldPrice': {
+        //         '_attributes': {
+        //             'display': data['show_sale_price']
+        //         },
+        //         '_text': data['sale-price']
+        //     },
+        //     'soldDate': data['sale-date']
+        // }
     }
     if (type == "residential_home") {
         item['isHomeLandPackage'] = {
@@ -686,7 +686,7 @@ router.get('/', (req, res) => {
  * @apiSuccess {Object} result Result JSON from realestate.com.au
  */
 
-router.get('/uploaddetails', authenticate, async (req, res) => {
+router.get('/uploaddetails', async (req, res) => {
     if (!req.query.uploadid) {
         return res.status(400).json({ status: "Unsuccessful.", msg: "Upload ID is not specified." })
     }

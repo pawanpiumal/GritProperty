@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import DataTable from 'react-data-table-component';
 import axios from 'axios';
-import Expand from './Expand2';
+import ExpandImports from './ExpandImports';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -14,29 +14,29 @@ const columns = [
         name: 'Index',
         selector: row => parseInt(row.id),
         sortable: true,
-        width: "10vw"
+        width: "9vw"
     },
     {
         name: 'XML',
         selector: row => row.xml,
         sortable: true,
-        width: "10vw"
+        width: "27vw"
     },
     {
         name: 'JSON',
         selector: row => row.json,
         sortable: true,
-        width: "20vw"
+        width: "27vw"
     },
     {
         name: 'Time',
         selector: row => row.time,
         sortable: true,
-        width: "20vw"
+        width: "27vw"
     }
 ]
 
-const ExpandedComponent = ({ data }) => <Expand data={data} />;
+const ExpandedComponent = ({ data }) => <ExpandImports data={data} />;
 
 class Error extends Component {
     constructor(props) {

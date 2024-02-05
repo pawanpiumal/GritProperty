@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import DataTable from 'react-data-table-component';
 import axios from 'axios';
-import Expand from './Expand';
+import ExpandUploads from './ExpandUploads';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -14,13 +14,13 @@ const columns = [
         name: 'Index',
         selector: row => parseInt(row.id),
         sortable: true,
-        width: "10vw"
+        width: "5vw"
     },
     {
         name: 'PostID',
         selector: row => row.postID,
         sortable: true,
-        width: "10vw"
+        width: "5vw"
     },
     {
         name: 'Post Type',
@@ -48,7 +48,7 @@ const columns = [
     }
 ]
 
-const ExpandedComponent = ({ data }) => <Expand data={data} />;
+const ExpandedComponent = ({ data }) => <ExpandUploads data={data} />;
 
 class Error extends Component {
     constructor(props) {

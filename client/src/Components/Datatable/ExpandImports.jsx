@@ -7,7 +7,7 @@ import Badge from 'react-bootstrap/Badge'
 
 import ReactJson from 'react-json-view';
 
-class Expand extends Component {
+class ExpandImports extends Component {
     isJSON = (json) => {
         try {
             var obj = JSON.parse(json)
@@ -49,4 +49,4 @@ class Expand extends Component {
     }
 }
 
-export default Expand;
+export default ExpandImports;

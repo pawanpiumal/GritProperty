@@ -18,25 +18,25 @@ const columns = [
         name: 'Index',
         selector: row => parseInt(row.index),
         sortable: true,
-        width: "10vw"
+        width: "9vw"
     },
     {
         name: 'File Name',
         selector: row => row.place,
         sortable: true,
-        width: "30vw"
+        width: "27vw"
     },
     {
         name: 'Error',
         selector: row => row.error,
         sortable: true,
-        width: "30vw"
+        width: "27vw"
     },
     {
         name: 'Time',
         selector: row => toDate(row.place.split('.')),
         sortable: true,
-        width: "30vw"
+        width: "27vw"
     }
 ]
 
