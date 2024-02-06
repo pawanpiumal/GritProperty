@@ -506,6 +506,7 @@ function wpse_185340_post_ping( $post_id, $post, $update) {
 		$response = wp_remote_post(
             'http://34.228.13.110:3000/api/exportproperty/export',
             array(
+                'timeout'     => 45,
 				'headers'=>array('Content-Type' => 'application/json' ),
                 // https://codex.wordpress.org/HTTP_API
                 'blocking' => true, // If you don't need to know the response, disable blocking for an "async" request
@@ -517,11 +518,16 @@ function wpse_185340_post_ping( $post_id, $post, $update) {
                 ))
             )
         );
-		if(json_decode($response['body'])->status == 'Unsuccessful'){
-			update_post_meta($post_id, 'uploadid', json_decode($response['body'])->msg,'');
-		}else{
-			update_post_meta($post_id, 'uploadid', json_decode($response['body'])->uploadId,'');
-		}
+        if(!is_wp_error($response)){
+            if(json_decode($response['body'])->status == 'Unsuccessful'){
+			    update_post_meta($post_id, 'uploadid', json_decode($response['body'])->msg,'');
+		    }else{
+			    update_post_meta($post_id, 'uploadid', json_decode($response['body'])->uploadId,'');
+		    }
+        }else{
+             update_post_meta($post_id, 'upload-error', $response->get_error_message(),'');
+             update_post_meta($post_id, 'uploadid', "",'');
+        }
 		//update_post_meta($post_id, 'uploadid', json_decode($response['body'])->uploadId,'');
 		
 	}
@@ -579,52 +585,44 @@ function wpdocs_post_submitbox_misc_actions($post){
 function add_content_after_editor() {
 	global $post;
 	if($post->post_type == "residential_home" || $post->post_type == "residential_rental" || $post->post_type == "residential_land"){
-		if(get_post_meta($post->ID,'uploadid',true) && get_post_meta($post->ID,'uploadid',true) != ""){
-			$response = wp_remote_get(
-            	'http://34.228.13.110:3000/api/exportproperty/uploaddetails?uploadid='. get_post_meta($post->ID,'uploadid',true),
-            	array('blocking' => true));
-			//echo '<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>';
-			/*
-			echo '<script>
-					const getJSON = async ()=>{
-						try{
-							var result = await axios.get("http://34.228.13.110:3000/api/exportproperty/uploaddetails?uploadid=8024741f-5414-4588-a535-f2a3a27c48d7");
-							document.getElementById("result-sentence").innerText = JSON.stringify(result.data);
-						}catch(err){
-							document.getElementById("result-sentence").innerText = err.stack;
-						}
-						
-					}
-					
-				  </script>';*/
-			
-			
-			
+		if((get_post_meta($post->ID,'uploadid',true) && get_post_meta($post->ID,'uploadid',true) != "")|| 
+		    (get_post_meta($post->ID,'upload-error',true) && get_post_meta($post->ID,'upload-error',true) != "")){
+		        if(get_post_meta($post->ID,'uploadid',true) != ""){
+		            $response = wp_remote_get('http://34.228.13.110:3000/api/exportproperty/uploaddetails?uploadid='. get_post_meta($post->ID,'uploadid',true), array('blocking' => true));
+		        }
+		        
 			echo '<button type="button" style="margin-top:20px;border: 1px solid rgb(195, 196, 199);color: #1d2327;
-			            display: block;background: rgb(255, 255, 255);" class="collapsible" onclick="(function(){
-    var tab = document.getElementById(\'content\');
-	if(!tab.style.display || tab.style.display===\'none\'){
-		tab.style.display=\'block\';
-	}else{
-		tab.style.display=\'none\';
-	}
-    return false;
-})();return false;"><h2 class="hndle ui-sortable-handle">Upload Details - Click to Open/Close</h2></button>';
+			            display: block;background: rgb(255, 255, 255);" class="collapsible" 
+			                        onclick="(function(){
+                                        var tab = document.getElementById(\'content\');
+	                                    if(!tab.style.display || tab.style.display===\'none\'){
+		                                    tab.style.display=\'block\';
+	                                    }else{
+		                                      tab.style.display=\'none\';
+	                                    }
+                                        return false;
+                                    })();return false;">
+                    <h2 class="hndle ui-sortable-handle">Upload Details - Click to Open/Close</h2>
+                </button>';
+                
 			echo '<div id="content" class="postbox content" style="border:1px solid #c3c4c7;border-top: 0px solid black;color:black;display:block; background:#ffffff;">
 						<div class="inside">';
+						
 			echo 			'<pre id="result-sentence">';
-			if(json_decode($response['body'])->status == 'Unsuccessful'){
-				echo json_decode($response['body'])->msg;
+			
+			if(get_post_meta($post->ID,"uploadid",true) != ""){
+			    if(json_decode($response['body'])->status == 'Unsuccessful'){
+				    echo json_decode($response['body'])->msg;
+			    }else{
+				    echo json_encode(json_decode($response['body'])->result,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			    }
 			}else{
-				echo json_encode(json_decode($response['body'])->result,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			    echo get_post_meta($post->ID,'upload-error',true);
 			}
-			//echo $response['body'];
+			
 			echo 			'</pre>';
+			echo      '</div>';
 			echo '</div>';
-			echo '</div>';
-		//	echo '<div class="misc-pub-section my-options">';
-		//	echo '	<input class="button" type="button" value="Upload Status" style="cursor:pointer" onClick="window.location.reload();" />';
-		//	echo '</div></div>';
 		}
 	}
 }

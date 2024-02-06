@@ -9,14 +9,7 @@ import ReactJson from 'react-json-view';
 
 import XMLViewer from 'react-xml-viewer'
 
-class ExpandUploads extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            result: "",
-            isLoading: true
-        }
-    }
+class ExpandRecords extends Component {
 
     isJSON = (item) => {
         let value = typeof item !== "string" ? JSON.stringify(item) : item;
@@ -29,47 +22,30 @@ class ExpandUploads extends Component {
         return typeof value === "object" && value !== null;
     }
 
-    componentDidMount() {
-        axios.get(`http://${process.env.REACT_APP_BackURL}exportproperty/uploaddetails?uploadid=${this.props.data.uploadID}`, {
-            headers: {
-                'Authorization': `bearer ${localStorage.getItem("userToken")}`
-            }
-        }).then(res => {
-            this.setState({
-                result: res.data.result,
-                isLoading: false
-            })
-        }).catch(err => {
-            this.setState({
-                result: err.response.data.msg,
-                isLoading: false
-            })
-        })
-    }
-
     render() {
 
         return (
             <Container style={{ border: "2px solid black", padding: "1%" }}>
                 <Row style={{ marginBottom: '20px' }}>
                     <Col xs={2}>
-                        Upload Details
+                        Headers
                     </Col>
                     <Col xs={10}>
-                        {this.state.isLoading ?
-                            <div className='loadblock'><div className="lds-facebook" ><div></div><div></div><div></div></div></div>
-                            :
-                            this.isJSON(this.state.result) ?
-                                <ReactJson src={this.state.result} collapsed={true} /> : this.state.result
+                        {
+                            this.isJSON(this.props.data.headers) ?
+                                <ReactJson src={JSON.parse(this.props.data.headers)} collapsed={true} /> : this.props.data.headers
                         }
                     </Col>
                 </Row>
                 <Row style={{ marginBottom: '20px' }}>
                     <Col xs={2}>
-                        Post Type
+                        Body
                     </Col>
                     <Col xs={10}>
-                        {this.props.data.postType}
+                        {
+                            this.isJSON(this.props.data.body) ?
+                                <ReactJson src={JSON.parse(this.props.data.body)} collapsed={true} /> : this.props.data.body
+                        }
                     </Col>
                 </Row>
                 <Row style={{ overflowWrap: 'anywhere' }}>
@@ -88,4 +64,4 @@ class ExpandUploads extends Component {
     }
 }
 
-export default ExpandUploads;
+export default ExpandRecords;

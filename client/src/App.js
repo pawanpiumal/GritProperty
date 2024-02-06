@@ -11,6 +11,7 @@ import Config from './Components/Config/Config';
 import ErrorFiles from './Components/Errors/ErrorFiles';
 import Uploads from './Components/Datatable/Uploads';
 import Imports from './Components/Datatable/Imports';
+import Records from './Components/Datatable/Records';
 
 function App() {
   return (
@@ -29,6 +30,8 @@ function App() {
           <Route path="/uploads/:limit" element={<Uploads />} />
           <Route path="/imports/" element={<Imports />} />
           <Route path="/imports/:limit" element={<Imports />} />
+          <Route path="/Records/" element={<Records />} />
+          <Route path="/Records/:limit" element={<Records />} />
           <Route path="/config" element={<Config />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

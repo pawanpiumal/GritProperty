@@ -8,15 +8,17 @@ import Badge from 'react-bootstrap/Badge'
 import ReactJson from 'react-json-view';
 
 class ExpandImports extends Component {
-    isJSON = (json) => {
+    isJSON = (item) => {
+        let value = typeof item !== "string" ? JSON.stringify(item) : item;
         try {
-            var obj = JSON.parse(json)
-            if (obj && typeof obj === 'object' && obj !== null) {
-                return true
-            }
-        } catch (err) { console.log(); }
-        return false
+            value = JSON.parse(value);
+        } catch (e) {
+            return false;
+        }
+
+        return typeof value === "object" && value !== null;
     }
+
     render() {
 
         return (
