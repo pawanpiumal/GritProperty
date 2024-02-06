@@ -8,6 +8,8 @@ const config = require('../../config/keys')
 
 const errorSQL = require('../../middleware/db').errorSQL
 
+const keepRecords = require('../../middleware/db').keepRecords
+
 /**
  * @api {get} api/login Check if the Login API is working
  * @apiName CheckLogin
@@ -35,7 +37,7 @@ router.get('/', (req, res) => {
  * @apiSuccess {String} token JWT token for the logged user.
  */
 
-router.post('/', (req, res) => {
+router.post('/', keepRecords, (req, res) => {
     username = req.body.username
     password = req.body.password
     if (username == config.webusername && password == config.webpassword) {

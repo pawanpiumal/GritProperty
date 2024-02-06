@@ -89,6 +89,18 @@ connection.query('CREATE TABLE IF NOT EXISTS uploads (\
     }
 })
 
+connection.query('CREATE TABLE IF NOT EXISTS records (\
+    id INT NOT NULL AUTO_INCREMENT,\
+    headers TEXT NOT NULL,\
+    originalUrl TEXT NOT NULL,\
+    body TEXT NOT NULL,\
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
+    PRIMARY KEY (id));', (error, results, fields) => {
+    if (error) {
+        errorFile("Create Table records", JSON.stringify(error))
+    }
+})
+
 connection.end()
 
 app.use("/api/postproperty", importProperty)

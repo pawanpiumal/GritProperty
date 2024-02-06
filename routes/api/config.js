@@ -10,6 +10,8 @@ const errorSQL = require('../../middleware/db').errorSQL
 const bodyparser = require('body-parser')
 const config = require('../../config/keys')
 
+const keepRecords = require('../../middleware/db').keepRecords
+
 /**
  * @api {get} api/config/get Get Config file
  * @apiName GetConfig
@@ -53,7 +55,7 @@ const isEmptyJson = (json) => {
  * @apiUse ErrorStatusMsg
  */
 
-router.post('/post', authenticate, bodyparser.text(), (req, res) => {
+router.post('/post', keepRecords, authenticate, bodyparser.text(), (req, res) => {
     if (!req.body || isEmptyJson(req.body)) {
         res.status(400).json({ status: "Unsuccessful", msg: "Config is not attached." })
     } else {

@@ -15,6 +15,7 @@ const authenticate = require('../../middleware/functions').authenticate
 const router = express.Router()
 const config = require('../../config/keys')
 
+const keepRecords = require('../../middleware/db').keepRecords
 
 const mysql = require('mysql2/promise');
 
@@ -621,7 +622,7 @@ getReaAccessToken = async () => {
  */
 
 
-router.post('/export', async (req, res) => {
+router.post('/export', keepRecords, async (req, res) => {
     if (req.body.publish != "true") {
         return res.status(200).json({ status: "Successful", msg: "Did not published in Realestate.com.au." })
     } else {

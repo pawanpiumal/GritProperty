@@ -36,7 +36,7 @@ const errorSQL = async function (place, error) {
 
         if (isJson(error)) {
             error = JSON.stringify(error).replace(/'/g, " ")
-        }else{
+        } else {
             error = `${`${error}`.replace(/'/g, " ")}`
         }
 
@@ -101,4 +101,40 @@ const uploadSQL = function (postID, postType, uploadID, xml) {
         connection.end()
     }
 }
-module.exports = { errorSQL, importSQL, uploadSQL }
+
+const keepRecords = (req, res, next) => {
+    var connection = mysql.createConnection({
+        port: db.port,
+        user: db.username,
+        password: db.password,
+        host: db.host,
+        database: db.db
+    });
+
+    if (req.headers && req.originalUrl && req.body) {
+        connection.connect(function (err) {
+            if (err) {
+                errorFile('MySQL Connection.', JSON.stringify(error))
+            }
+        });
+
+        var body = "";
+        if (isJson(req.body)) {
+            body = JSON.stringify(req.body).replace(/'/g, " ")
+        } else {
+            body = `${`${req.body}`.replace(/'/g, " ")}`
+        }
+
+
+        connection.query(`INSERT INTO records(headers, originalUrl,body) VALUES('${JSON.stringify(req.headers)}','${req.originalUrl}','${body}')`, (error) => {
+            if (error) {
+                errorFile('MySQL insert errors.', JSON.stringify(error))
+            }
+        })
+
+        connection.end()
+    }
+
+    next();
+}
+module.exports = { errorSQL, importSQL, uploadSQL, keepRecords }

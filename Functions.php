@@ -598,30 +598,10 @@ function add_content_after_editor() {
 					
 				  </script>';*/
 			
-			echo '<style>.collapsible {
-  background-color: #777;
-  color: white;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-}
-
-.active, .collapsible:hover {
-  background-color: #555;
-}
-
-.content {
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
-  background-color: #f1f1f1;
-}</style>';
 			
-			echo '<button type="button" style="margin-top:20px;" class="collapsible" onclick="(function(){
+			
+			echo '<button type="button" style="margin-top:20px;border: 1px solid rgb(195, 196, 199);color: #1d2327;
+			            display: block;background: rgb(255, 255, 255);" class="collapsible" onclick="(function(){
     var tab = document.getElementById(\'content\');
 	if(!tab.style.display || tab.style.display===\'none\'){
 		tab.style.display=\'block\';
@@ -629,8 +609,8 @@ function add_content_after_editor() {
 		tab.style.display=\'none\';
 	}
     return false;
-})();return false;">Upload Details - Click to Open/Close</button>';
-			echo '<div id="content" class="postbox content" style="border:1px solid #c3c4c7;color:black;display:block; background:#ffffff;">
+})();return false;"><h2 class="hndle ui-sortable-handle">Upload Details - Click to Open/Close</h2></button>';
+			echo '<div id="content" class="postbox content" style="border:1px solid #c3c4c7;border-top: 0px solid black;color:black;display:block; background:#ffffff;">
 						<div class="inside">';
 			echo 			'<pre id="result-sentence">';
 			if(json_decode($response['body'])->status == 'Unsuccessful'){
@@ -649,3 +629,80 @@ function add_content_after_editor() {
 	}
 }
 add_action( 'edit_form_after_title', 'add_content_after_editor' );
+
+function import_axios_js() {
+    //$url = get_bloginfo('template_directory') . '/js/wp-admin.js';
+    echo '<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>';
+    echo 
+        '<script>
+            function syntaxHighlight(json) {
+                json = json.replace(/&/g, \'&amp;\').replace(/</g, \'&lt;\').replace(/>/g, \'&gt;\');
+                return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = \'number\';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = \'key\';
+                    } else {
+                        cls = \'string\';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = \'boolean\';
+                } else if (/null/.test(match)) {
+                    cls = \'null\';
+                }
+                return \'<span class="\' + cls + \'">\' + match + \'</span>\';
+            });
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            const para = document.getElementById("result-sentence");
+            para.innerHTML = syntaxHighlight(para.innerHTML);
+        });
+        </script>';
+}
+add_action('admin_footer', 'import_axios_js');
+
+function import_style(){
+    echo '<style>.collapsible {
+  background-color: #fff;
+  color: #1d2327;
+  cursor: pointer;
+  padding: 0px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active, .collapsible:hover {
+  background-color: #555;
+}
+
+.content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+  
+ .string {
+            color: rgb(0, 168, 0);
+        }
+
+        .number {
+            color: rgb(171, 94, 0);
+        }
+
+        .boolean {
+            color: rgb(0, 0, 156);
+        }
+
+        .null {
+            color: rgb(151, 1, 151);
+        }
+
+        .key {
+            color: rgb(147, 0, 0);
+        }
+}</style>';
+}
+add_action('admin_head', 'import_style');

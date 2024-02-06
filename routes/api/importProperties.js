@@ -13,6 +13,7 @@ const authenticate = require('../../middleware/functions').authenticate
 const router = express.Router()
 const config = require('../../config/keys')
 
+const keepRecords = require('../../middleware/db').keepRecords
 
 const timeSplitString = (value, type) => {
     if (value != "") {
@@ -604,7 +605,7 @@ postProperty = async (result, type, reqStatus = "draft") => {
  */
 
 
-router.post('/', authenticate, async (req, res) => {
+router.post('/', keepRecords, authenticate, async (req, res) => {
     console.log({ "msg": "Request Recievied" });
 
     if (!req.rawBody || req.rawBody == "") {
@@ -694,7 +695,7 @@ const db = require('../../config/keys');
  * @apiUse ErrorStatusMsg
  */
 
-router.get('/importSQL', authenticate, async (req, res) => {
+router.get('/importSQL', keepRecords, authenticate, async (req, res) => {
     var connection = await mysql.createConnection({
         port: db.port,
         user: db.username,
