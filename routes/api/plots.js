@@ -15,14 +15,14 @@ const db = require('../../config/keys');
 router.get('/all', async (req, res) => {
     var type = "";
     if (!req.query.type) {
-        return res.status(400).json({ status: "Unsuccessful", msg: "Type is not one of (errors, imports, uploads, records)." });
+        return res.status(400).json({ status: "Unsuccessful", msg: "Type is not one of (errors, imports, records, uploads)." });
     } else {
         type = req.query.type;
     }
 
     var typeArray = ['errors', 'imports', 'uploads', 'records'];
     if (!typeArray.includes(type)) {
-        return res.status(400).json({ status: "Unsuccessful", msg: "Type is not one of (errors, imports, uploads, records)." });
+        return res.status(400).json({ status: "Unsuccessful", msg: "Type is not one of (errors, imports, records, uploads)." });
     }
 
     var duration = "day";
@@ -63,6 +63,17 @@ router.get('/all', async (req, res) => {
         host: db.host,
         database: db.db
     });
+
+    // var startdate = req.query.startdate;
+    // var enddate = req.query.enddate;
+    // var starttime = req.query.starttime;
+    // var endtime = req.query.endtime;
+    // if ((startdate && enddate && starttime && endtime)) {
+
+    // }
+    // if (startdate) {
+
+    // }
 
     var SQLString = `SELECT COUNT(*) as Count, substring(time,1,${dcut}) as Date FROM ${type} GROUP BY substring(time,1,${dcut});`;
     // console.log(SQLString);

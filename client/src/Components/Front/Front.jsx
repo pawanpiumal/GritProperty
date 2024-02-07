@@ -127,7 +127,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/plots">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Header.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2">
+                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('plots.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2">
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Plots </Card.Title>
