@@ -18,15 +18,29 @@ class Login extends Component {
             password: ""
         }
     }
-    componentDidMount() {
+    async componentDidMount() {
+        await axios.get('https://api.ipify.org/?format=json').then(res => {
+            localStorage.setItem('ipAddress', res.data.ip)
+            axios.get(`https://api.iplocation.net/?ip=${res.data.ip}`).then(res2 => {
+                localStorage.setItem('ipDetails', JSON.stringify(res2.data))
+            }).catch(e => {
+                localStorage.setItem('ipDetails', "")
+            })
+        }).catch(e => {
+            localStorage.setItem('ipAddress', "")
+        })
+
         if (localStorage.getItem('userToken') && localStorage.getItem('userToken') != "") {
             const decoded = jwtDecode(localStorage.getItem('userToken'))
             // console.log(decoded);
-            axios.post(`http://${process.env.REACT_APP_LoginURL}`, {
+            await axios.post(`http://${process.env.REACT_APP_LoginURL}`, {
                 "username": decoded.username,
                 "password": decoded.password
+            }, {
+                headers: {
+                    'ipDetails': localStorage.getItem('ipDetails')
+                }
             }).then(res => {
-                console.log(res.data.token);
                 localStorage.setItem('userToken', res.data.token)
                 Swal.fire({
                     icon: 'success',

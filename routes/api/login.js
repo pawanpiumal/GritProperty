@@ -41,11 +41,11 @@ router.post('/', keepRecords, (req, res) => {
     username = req.body.username
     password = req.body.password
     if (username == config.webusername && password == config.webpassword) {
-        jwt.sign({ username, password }, config.jwtSecret, { expiresIn: '1h' }, (err, token) => {
+        jwt.sign({ username, password }, config.jwtSecret, { expiresIn: config.accountExpire }, (err, token) => {
             if (!err) {
                 res.status(200).json({ status: "Successful", msg: "Loggedin", token })
             } else {
-                errorSQL('Login', err)
+                errorSQL('Login.js - Login', err)
                 res.status(400).json({ status: "Unsuccessful", msg: "Error in creating the token. Try again later." })
             }
         })

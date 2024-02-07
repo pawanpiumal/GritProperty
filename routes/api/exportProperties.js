@@ -27,7 +27,7 @@ getImageURL = async (id) => {
     var item = ""
     if (id) {
         item = await axios.get(url).catch(err => {
-            errorSQL('Get media URL', err)
+            errorSQL('ExportProperties.js - Get media URL', err)
         })
     }
     return (item.data?.source_url);
@@ -62,7 +62,7 @@ getProperty = async (id, type) => {
             Authorization: `basic ${config.WPAuthorization}`
         }
     }).catch(err => {
-        errorSQL('getExportData', err)
+        errorSQL('ExportProperties.js - getExportData', err)
     })
 
 
@@ -601,7 +601,7 @@ getReaAccessToken = async () => {
         },
         data: data
     }).catch((error) => {
-        errorSQL('Getting Access Token fro REA', error)
+        errorSQL('ExportProperties.js - Getting Access Token fro REA', error)
     });
 
     return (token.data.access_token)
@@ -645,12 +645,12 @@ router.post('/export', keepRecords, async (req, res) => {
                 return res.status(200).json({ status: "Successful", msg: "Uploaded to realestate.com.au", uploadId: result.data.uploadId })
 
             }).catch((error) => {
-                errorSQL('Publishing the property.', error)
+                errorSQL('ExportProperties.js - Publishing the property.', error)
                 return res.status(400).json({ status: "Unsuccessful", msg: "Error occured while uploading the property to realestate.com.au" })
             });
 
         } catch (err) {
-            await errorSQL('Creating the XML object.', err.stack)
+            await errorSQL('ExportProperties.js - Creating the XML object.', err.stack)
             return res.status(400).json({ status: "Unsuccessful", msg: "Error in getting the property from wordpress to XML object." })
         }
 
@@ -702,7 +702,7 @@ router.get('/uploaddetails', async (req, res) => {
         res.status(200).json({ status: "Successful", msg: "Results are attached.", result: result.data })
 
     }).catch((error) => {
-        errorSQL('Getting the upload details.', error)
+        errorSQL('ExportProperties.js - Getting the upload details.', error)
         res.status(400).json({ status: "Unsuccessful", msg: "Error getting the upload details." })
     });
 })
@@ -741,7 +741,7 @@ router.get('/uploadSQL', authenticate, async (req, res) => {
     const [rows, fields] = await connection.execute(`SELECT * FROM uploads ORDER BY time DESC LIMIT 0,${limit}`).catch(err => {
         if (err) {
             // console.log({ err });
-            errorFile("SQL SELECT for Uploads.", JSON.stringify(error))
+            errorSQL("ExportProperties.js - SQL SELECT for Uploads.", JSON.stringify(error))
             res.status(400).json({ status: "Unsuccessful", msg: "Error reading data from the database." })
         }
     })

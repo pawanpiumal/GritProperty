@@ -28,7 +28,7 @@ router.get('/get', authenticate, (req, res) => {
         data = fs.readFileSync('./config/keys.js', { encoding: 'utf-8' })
         res.status(200).json({ status: "Successful", msg: "Config is attached.", "config": data })
     } catch (err) {
-        errorSQL('Reading Config file', err)
+        errorSQL('Config.js - Reading Config file', err)
         res.status(400).json({ status: "Unsuccessful", msg: "Error reading the config file." })
 
     }
@@ -64,7 +64,7 @@ router.post('/post', keepRecords, authenticate, bodyparser.text(), (req, res) =>
             res.status(200).json({ status: "Successful", msg: "Config file changed successfully." })
 
         } catch (err) {
-            errorSQL('Writing Config file', err)
+            errorSQL('Config.js - Writing Config file', err)
             res.status(400).json({ status: "Unsuccessful", msg: "Error writing the config file." })
         }
     }

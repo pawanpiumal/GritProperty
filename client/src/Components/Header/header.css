@@ -1,12 +1,13 @@
 #header-nav-bar {
     background-color: #111111;
+    padding: 2.5%;
 }
 
 .navbar-title {
     /* color: linear-gradient(343deg, rgba(255, 255, 255, 0.736) 0%, rgb(255, 255, 255) 20%, rgba(255, 255, 255, 0.932) 0%); */
     text-align: center;
     margin-top: 0px;
-    padding: 2%;
+    /* padding: 2%; */
     /* font-family: 'Copperplate','Lucida Console', 'Courier New', Courier, monospace; */
     font-weight: 900;
     transform: scale(1, 2);

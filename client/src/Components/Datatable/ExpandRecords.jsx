@@ -48,17 +48,6 @@ class ExpandRecords extends Component {
                         }
                     </Col>
                 </Row>
-                <Row style={{ overflowWrap: 'anywhere' }}>
-                    <Col xs={2}>
-                        XML
-                    </Col>
-                    <Col xs={10}>
-                        <XMLViewer xml={`"${this.props.data.xml}"`} collapsible={true} initalCollapsedDepth={0} />
-                    </Col>
-
-                </Row>
-
-
             </Container>
         );
     }

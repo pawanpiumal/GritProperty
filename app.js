@@ -17,6 +17,7 @@ const exportProperty = require('./routes/api/exportProperties')
 const login = require('./routes/api/login')
 const database = require('./routes/api/database')
 const config = require('./routes/api/config')
+const plots = require('./routes/api/plots')
 
 
 app.use(cors())
@@ -38,14 +39,14 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) {
-        errorFile("Connection App.js", err)
+        errorFile("App.js - Connection App.js", err)
         return;
     }
     console.log('connected as id ' + connection.threadId);
 });
 
 connection.query(`CREATE DATABASE IF NOT EXISTS ${db.db}`, (error, results, fields) => {
-    if (error) errorFile("Create Database", error)
+    if (error) errorFile("App.js - Create Database", error)
 })
 
 connection.changeUser({ database: db.db }, (err) => {
@@ -61,7 +62,7 @@ connection.query('CREATE TABLE IF NOT EXISTS errors (\
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
     PRIMARY KEY (id));', (error, results, fields) => {
     if (error) {
-        errorFile("Create Table errors", JSON.stringify(error))
+        errorFile("App.js - Create Table errors", JSON.stringify(error))
     }
 })
 
@@ -72,7 +73,7 @@ connection.query('CREATE TABLE IF NOT EXISTS imports (\
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
     PRIMARY KEY (id));', (error, results, fields) => {
     if (error) {
-        errorFile("Create Table imports", JSON.stringify(error))
+        errorFile("App.js - Create Table imports", JSON.stringify(error))
     }
 })
 
@@ -85,7 +86,7 @@ connection.query('CREATE TABLE IF NOT EXISTS uploads (\
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
     PRIMARY KEY (id));', (error, results, fields) => {
     if (error) {
-        errorFile("Create Table uploads", JSON.stringify(error))
+        errorFile("App.js - Create Table uploads", JSON.stringify(error))
     }
 })
 
@@ -97,7 +98,7 @@ connection.query('CREATE TABLE IF NOT EXISTS records (\
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
     PRIMARY KEY (id));', (error, results, fields) => {
     if (error) {
-        errorFile("Create Table records", JSON.stringify(error))
+        errorFile("App.js - Create Table records", JSON.stringify(error))
     }
 })
 
@@ -108,6 +109,7 @@ app.use("/api/exportproperty", exportProperty)
 app.use("/api/login", login)
 app.use("/api/db", database)
 app.use("/api/config", config)
+app.use("/api/plots", plots)
 
 
 /**

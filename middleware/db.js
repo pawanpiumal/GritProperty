@@ -30,7 +30,7 @@ const errorSQL = async function (place, error) {
     if (place && error) {
         connection.connect(function (err) {
             if (err) {
-                errorFile('MySQL Connection.', JSON.stringify(error))
+                errorFile('DB.js - MySQL Connection.', JSON.stringify(error))
             }
         });
 
@@ -42,7 +42,7 @@ const errorSQL = async function (place, error) {
 
         await connection.query(`INSERT INTO errors(place,error) VALUES('${place}','${error}')`, (error) => {
             if (error) {
-                errorFile('MySQL insert errors.', JSON.stringify(error))
+                errorFile('DB.js - MySQL insert errors.', JSON.stringify(error))
             }
         })
 
@@ -62,13 +62,13 @@ const importSQL = function (xml, json) {
     if (xml && json) {
         connection.connect(function (err) {
             if (err) {
-                errorFile('MySQL Connection.', JSON.stringify(error))
+                errorFile('DB.js - MySQL Connection.', JSON.stringify(error))
             }
         });
 
         connection.query(`INSERT INTO imports(xml,json) VALUES('${JSON.stringify(xml)}','${JSON.stringify(json)}')`, (error) => {
             if (error) {
-                errorFile('MySQL insert errors.', JSON.stringify(error))
+                errorFile('DB.js - MySQL insert errors.', JSON.stringify(error))
             }
         })
 
@@ -88,13 +88,13 @@ const uploadSQL = function (postID, postType, uploadID, xml) {
     if (postID && postType && uploadID && xml) {
         connection.connect(function (err) {
             if (err) {
-                errorFile('MySQL Connection.', JSON.stringify(error))
+                errorFile('DB.js - MySQL Connection.', JSON.stringify(error))
             }
         });
 
         connection.query(`INSERT INTO uploads(postID, postType,uploadID,xml) VALUES('${parseInt(postID)}','${postType}','${uploadID}','${xml}')`, (error) => {
             if (error) {
-                errorFile('MySQL insert errors.', JSON.stringify(error))
+                errorFile('DB.js - MySQL insert errors.', JSON.stringify(error))
             }
         })
 
@@ -114,7 +114,7 @@ const keepRecords = (req, res, next) => {
     if (req.headers && req.originalUrl && req.body) {
         connection.connect(function (err) {
             if (err) {
-                errorFile('MySQL Connection.', JSON.stringify(error))
+                errorFile('DB.js - MySQL Connection.', JSON.stringify(err))
             }
         });
 
@@ -128,7 +128,7 @@ const keepRecords = (req, res, next) => {
 
         connection.query(`INSERT INTO records(headers, originalUrl,body) VALUES('${JSON.stringify(req.headers)}','${req.originalUrl}','${body}')`, (error) => {
             if (error) {
-                errorFile('MySQL insert errors.', JSON.stringify(error))
+                errorFile('DB.js - MySQL insert errors.', JSON.stringify(error))
             }
         })
 

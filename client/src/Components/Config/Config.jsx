@@ -14,7 +14,8 @@ class Config extends Component {
     componentDidMount() {
         axios.get(`http://${process.env.REACT_APP_BackURL}config/get`, {
             headers: {
-                'Authorization': `bearer ${localStorage.getItem('userToken')}`
+                'Authorization': `bearer ${localStorage.getItem('userToken')}`,
+                'ipDetails': localStorage.getItem('ipDetails')
             }
         }).then(res => {
             // console.log(res.data.config);

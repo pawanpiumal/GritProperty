@@ -92,7 +92,7 @@ const checkAvailabilityFile = async (filename) => {
     filename = filename.split('.')[0]
     var listRes = await axios.get(`${url}/?search=${filename}`).catch(err => {
         if (err.response?.data?.code != "rest_post_invalid_page_number") {
-            errorSQL("Checking List of Media", err)
+            errorSQL("ImportProperties.js - Checking List of Media", err)
         }
     })
 
@@ -103,7 +103,7 @@ const checkAvailabilityFile = async (filename) => {
                 'Authorization': `Basic ${config.WPAuthorization}`
             }
         }).catch(err2 => {
-            errorSQL("Delete existing media", err2)
+            errorSQL("ImportProperties.js - Delete existing media", err2)
         })
     })
 }
@@ -160,14 +160,14 @@ const uploadFile = async (filename) => {
         fileid = res.data.id
     }).catch(err => {
         console.error(err)
-        errorSQL("Upload Image to WP", err)
+        errorSQL("ImportProperties.js - Upload Image to WP", err)
     })
     return (fileid)
 }
 
 const deleteFile = (filename) => {
     fs.rename('downloads/' + filename, 'downloads/trash/' + filename, err => {
-        errorSQL("Move file to trash", err)
+        errorSQL("ImportProperties.js - Move file to trash", err)
     })
 }
 
@@ -177,13 +177,13 @@ const path = require("path");
 const deleteFileOn24Interval = () => {
     fs.readdir('downloads/trash', (err, files) => {
         if (err) {
-            errorSQL('Deleting files at midnight', err)
+            errorSQL('ImportProperties.js - Deleting files at midnight', err)
         }
 
         for (const file of files) {
             fs.unlink(path.join('downloads/trash', file), (err) => {
                 if (err) {
-                    errorSQL('Deleting files at midnight', err)
+                    errorSQL('ImportProperties.js - Deleting files at midnight', err)
                 }
             });
         }
@@ -223,7 +223,7 @@ const checkList = async (type, uniqueidToCheck) => {
             }
         }).catch(err => {
             if (err.response.data.code != "rest_post_invalid_page_number") {
-                errorSQL("Checking List of Posts", err)
+                errorSQL("ImportProperties.js - Checking List of Posts", err)
             }
             breakLoop = true
         })
@@ -582,7 +582,7 @@ postProperty = async (result, type, reqStatus = "draft") => {
 
     await axios.request(configReq).then(res => {
     }).catch((error) => {
-        errorSQL("Upload Property", error)
+        errorSQL("ImportProperties.js - Upload Property", error)
     });
 
     importSQL(result, item)
@@ -614,7 +614,7 @@ router.post('/', keepRecords, authenticate, async (req, res) => {
     try {
         var result = JSON.parse(convert.xml2json(req.rawBody, { compact: true }))
     } catch (err) {
-        errorSQL("Import Parsing the XML to JSON.", err)
+        errorSQL("ImportProperties.js - Import Parsing the XML to JSON.", err)
         return res.status(400).json({ status: "Unsuccessful", msg: "Invalid XML object." })
     }
 
@@ -625,7 +625,7 @@ router.post('/', keepRecords, authenticate, async (req, res) => {
             await postProperty(result[Object.keys(result)[0]], type, req.query.status)
             res.status(200).json({ status: "Successful", msg: "Property Uploaded.", result })
         } catch (err) {
-            errorSQL("Uploading Property Try Catch 1 (No Property List/ Single Object)", err)
+            errorSQL("ImportProperties.js - Uploading Property Try Catch 1 (No Property List/ Single Object)", err)
             res.status(400).json({ status: "Unsuccessful", msg: "Error uploading the property." })
         }
     } else if (type == "propertyList" && result.propertyList && Object.keys(result.propertyList).length == 1 && Array.isArray(result.propertyList[Object.keys(result.propertyList)[0]])) {
@@ -638,7 +638,7 @@ router.post('/', keepRecords, authenticate, async (req, res) => {
 
             res.status(200).json({ status: "Successful", msg: "Property Uploaded.", result })
         } catch (err) {
-            errorSQL("Uploading Property Try Catch 2 (Property List/ Single Type/ Multiple objects)", err)
+            errorSQL("ImportProperties.js - Uploading Property Try Catch 2 (Property List/ Single Type/ Multiple objects)", err)
             res.status(400).json({ status: "Unsuccessful", msg: "Error uploading the property." })
         }
     } else if (type == "propertyList" && result.propertyList && Object.keys(result.propertyList).length != 1) {
@@ -656,7 +656,7 @@ router.post('/', keepRecords, authenticate, async (req, res) => {
             }))
             res.status(200).json({ status: "Successful", msg: "Property Uploaded.", result })
         } catch (err) {
-            errorSQL("Uploading Property Try Catch 3 (Property List/ Multiple Types)", err)
+            errorSQL("ImportProperties.js - Uploading Property Try Catch 3 (Property List/ Multiple Types)", err)
             res.status(400).json({ status: "Unsuccessful", msg: "Error uploading the property." })
         }
     } else {
@@ -713,7 +713,7 @@ router.get('/importSQL', keepRecords, authenticate, async (req, res) => {
     const [rows, fields] = await connection.execute(`SELECT * FROM imports ORDER BY time DESC LIMIT 0,${limit}`).catch(err => {
         if (err) {
             // console.log({ err });
-            errorFile("SQL SELECT for Imports.", JSON.stringify(error))
+            errorSQL("ImportProperties.js - SQL SELECT for Imports.", JSON.stringify(error))
             res.status(400).json({ status: "Unsuccessful", msg: "Error reading data from the database." })
         }
     })

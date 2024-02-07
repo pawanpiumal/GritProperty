@@ -12,6 +12,7 @@ import ErrorFiles from './Components/Errors/ErrorFiles';
 import Uploads from './Components/Datatable/Uploads';
 import Imports from './Components/Datatable/Imports';
 import Records from './Components/Datatable/Records';
+import Plots from './Components/Plots/Plots';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/Records/" element={<Records />} />
           <Route path="/Records/:limit" element={<Records />} />
           <Route path="/config" element={<Config />} />
+          <Route path="/plots" element={<Plots />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div >

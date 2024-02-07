@@ -44,7 +44,7 @@ router.get('/errors', authenticate, async (req, res) => {
     const [rows, fields] = await connection.execute(`SELECT * FROM errors ORDER BY time DESC LIMIT 0,${limit}`).catch(err => {
         if (err) {
             // console.log({ err });
-            errorFile("SQL SELECT for Errors.", JSON.stringify(error))
+            errorSQL("Database.js - SQL SELECT for Errors.", JSON.stringify(error))
             res.status(400).json({ status: "Unsuccessful", msg: "Error reading data from the database." })
         }
     })
@@ -79,7 +79,7 @@ router.get('/errorFiles', authenticate, async (req, res) => {
     try {
         fs.readdir('Errors', async (err, files) => {
             if (err) {
-                errorSQL('Reading Error files', err)
+                errorSQL('Database.js - Reading Error files', err)
                 return res.status(400).json({ status: "Successful", msg: "Error reading files." })
             }
             fileArray = []
@@ -87,7 +87,7 @@ router.get('/errorFiles', authenticate, async (req, res) => {
                 try {
                     fileArray.push({ index: i, place: file, error: fs.readFileSync('Errors/' + file, 'utf-8') })
                 } catch (err) {
-                    errorSQL('Reading Single Error file', err)
+                    errorSQL('Database.js - Reading Single Error file', err)
                     return res.status(400).json({ status: "Successful", msg: "Error reading files." })
                 }
             }
@@ -95,7 +95,7 @@ router.get('/errorFiles', authenticate, async (req, res) => {
             return res.status(200).json({ status: "Successful", msg: "Errors are attached.", rows: fileArray.reverse().slice(0, limit) })
         })
     } catch (err) {
-        errorSQL('Reading Error files', err)
+        errorSQL('Database.js - Reading Error files', err)
         return res.status(400).json({ status: "Unsuccessful", msg: "Error reading files." })
     }
 })
@@ -144,7 +144,7 @@ router.get('/records', async (req, res) => {
     const [rows, fields] = await connection.execute(`SELECT * FROM records ORDER BY time DESC LIMIT 0,${limit}`).catch(err => {
         if (err) {
             // console.log({ err });
-            errorFile("SQL SELECT for Records.", JSON.stringify(error))
+            errorSQL("Database.js - SQL SELECT for Records.", JSON.stringify(error))
             return res.status(400).json({ status: "Unsuccessful", msg: "Error reading data from the records SQL." })
         }
     })
