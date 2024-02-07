@@ -200,12 +200,20 @@ class Plots extends Component {
     datetimePick = () => {
         let { initialData, startdate, starttime, enddate, endtime } = this.state;
         if (startdate != "" && starttime != "" && enddate != "" && endtime != "") {
+            var bottom = 0;
+            var top = 0;
             var data = initialData.filter(e => {
-                return new Date(e.Date) >= new Date(`${startdate} ${starttime}`) && new Date(e.Date) <= new Date(`${enddate} ${endtime}`)
+                if (new Date(e.Date) >= new Date(`${startdate} ${starttime}`) && new Date(e.Date) <= new Date(`${enddate} ${endtime}`)) {
+                    if (e.Count < bottom) bottom = e.Count
+                    if (e.Count > top) top = e.Count
+                    return true
+                }
             })
 
             this.setState({
                 data: data,
+                bottom: bottom,
+                top: top + 5
             })
         }
     }
