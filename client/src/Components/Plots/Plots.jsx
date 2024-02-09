@@ -215,6 +215,22 @@ class Plots extends Component {
                 bottom: bottom,
                 top: top + 5
             })
+        } else if (startdate != "" && enddate != "" && ['day', 'month', 'year'].includes(this.state.duration)) {
+            var bottom = 0;
+            var top = 0;
+            var data = initialData.filter(e => {
+                if (new Date(e.Date) >= new Date(startdate) && new Date(e.Date) <= new Date(enddate)) {
+                    if (e.Count < bottom) bottom = e.Count
+                    if (e.Count > top) top = e.Count
+                    return true
+                }
+            })
+
+            this.setState({
+                data: data,
+                bottom: bottom,
+                top: top + 5
+            })
         }
     }
 
