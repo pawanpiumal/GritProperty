@@ -1,0 +1,12 @@
+.xterm .xterm-screen {
+    position: absolute;
+}
+
+.term-win {
+    border: 5px white solid;
+    border-radius: 15px;
+    margin: 5%;
+    padding: 15px;
+    height: 80vh;
+    background-color: #012456;
+}
