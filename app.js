@@ -143,6 +143,8 @@ app.use("/api/plots", plots)
  * 
  */
 
+const terminal = require('./routes/api/terminal')
+
 app.get('//', (req, res) => {
     res.status(200).json({ status: "Successful", msg: "Rest API is working" })
 })

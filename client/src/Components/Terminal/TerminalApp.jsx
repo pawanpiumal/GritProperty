@@ -1,49 +1,62 @@
 import React, { Component } from 'react';
 import 'xterm/css/xterm.css'
 import { Terminal } from 'xterm'
-import { AttachAddon } from 'xterm-addon-attach';
-// import * as attach from 'xterm/lib/addons/attach/attach'
 
-// Terminal.applyAddon(AttachAddon)
+const socket = new WebSocket(`ws://${process.env.REACT_APP_IP}:6060`);
 
 class TerminalApp extends Component {
 
-  async componentDidMount() {
-    const protocol = (window.location.protocol === 'https:') ? 'wss://' : 'ws://';
-    let socketURL = protocol + window.location.hostname + ((window.location.port) ? (':' + window.location.port) : '') + '/terminals/'
+    async componentDidMount() {
 
-    const term = new Terminal({});
-    term.open(this.termElm);
+        socket.onmessage = (event) => {
+            term.write(event.data);
 
-    const res = await fetch('/terminals?cols=' + term.cols + '&rows=' + term.rows, { method: 'POST' })
-    const processId = await res.text()
+        }
 
-    // const pid = processId;
-    socketURL += processId;
-    const socket = new WebSocket(socketURL);
+        var term = new Terminal({
+            cursorBlink: true
+        });
 
-    socket.onopen = () => {
-      const attachAddon = new AttachAddon(socket);
-      term.loadAddon(attachAddon);
-      // term.attach(socket);
-      term._initialized = true;
+        term.open(this.termElm)
+
+        function init() {
+            if (term._initialized) {
+                return;
+            }
+
+            term._initialized = true;
+
+            term.prompt = () => {
+                runCommand('\n');
+            };
+            setTimeout(() => {
+                term.prompt();
+            }, 300);
+
+            term.onKey(keyObj => {
+                runCommand(keyObj.key);
+            });
+        }
+
+        function runCommand(command) {
+            socket.send(command);
+
+        }
+
+        init();
+        this.term = term
     }
-    this.term = term
-  }
 
 
-  render() {
-    return (
-      <div className="App">
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        <div style={{ padding: '10px' }}>
-          <div ref={ref => this.termElm = ref}></div>
-        </div>
-      </div>
-    );
-  }
+    render() {
+        return (
+            <div className="App">
+                <div style={{ padding: '10px' }}>
+                    <div ref={ref => this.termElm = ref}></div>
+                </div>
+            </div>
+        );
+    }
 }
 
 export default TerminalApp;
