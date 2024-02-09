@@ -13,6 +13,7 @@ import Uploads from './Components/Datatable/Uploads';
 import Imports from './Components/Datatable/Imports';
 import Records from './Components/Datatable/Records';
 import Plots from './Components/Plots/Plots';
+import TerminalApp from './Components/Terminal/TerminalApp';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/Records/:limit" element={<Records />} />
           <Route path="/config" element={<Config />} />
           <Route path="/plots" element={<Plots />} />
+          <Route path="/terminal" element={<TerminalApp />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div >
