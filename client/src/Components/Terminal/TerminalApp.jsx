@@ -38,7 +38,10 @@ class TerminalApp extends Component {
             });
         }
 
+        function isOpen(ws) { return ws.readyState === ws.OPEN }
+
         function runCommand(command) {
+            if (!isOpen(socket)) return;
             socket.send(command);
 
         }
