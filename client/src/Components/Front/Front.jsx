@@ -31,7 +31,7 @@ class Front extends Component {
                 <Row style={{ margin: '5%' }}>
                     <Col>
                         <Link to="/login">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Login.jpg')` }} className="mb-2" >
+                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Login.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" >
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Login </Card.Title>
@@ -43,7 +43,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/import">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Import.jpg')`, boxShadow: 'inset 0 0 100px #000' }} className="mb-2">
+                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Import.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2">
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Import </Card.Title>
@@ -55,7 +55,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/errors">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Error.webp')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" >
+                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Error.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" >
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Errors SQL</Card.Title>
@@ -67,7 +67,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/errorFiles">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('ErrorFile.webp')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2"  >
+                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('ErrorFile.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2"  >
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Errors Files </Card.Title>

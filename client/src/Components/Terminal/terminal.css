@@ -10,3 +10,7 @@
     height: 80vh;
     background-color: #012456;
 }
+
+.card-body {
+    /* filter: invert(16%) sepia(20%) saturate(6906%) hue-rotate(190deg) brightness(95%) contrast(99%); */
+}
