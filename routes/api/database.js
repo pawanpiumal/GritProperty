@@ -126,7 +126,7 @@ router.get('/', (req, res) => {
  * @apiUse ErrorStatusMsg
  */
 
-router.get('/records', async (req, res) => {
+router.get('/records', authenticate, async (req, res) => {
     var connection = await mysql.createConnection({
         port: db.port,
         user: db.username,
