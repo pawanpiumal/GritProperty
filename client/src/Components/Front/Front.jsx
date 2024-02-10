@@ -31,7 +31,7 @@ class Front extends Component {
                 <Row style={{ margin: '5%' }}>
                     <Col>
                         <Link to="/login">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Login.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" >
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('Login.jpg')` }} className="mb-2" >
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Login </Card.Title>
@@ -43,7 +43,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/import">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Import.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2">
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('Import.jpg')` }} className="mb-2">
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Import </Card.Title>
@@ -55,7 +55,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/errors">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Error.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" >
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('Error.jpg')` }} className="mb-2" >
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Errors SQL</Card.Title>
@@ -67,7 +67,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/errorFiles">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('ErrorFile.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2"  >
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('ErrorFile.jpg')` }} className="mb-2"  >
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Errors Files </Card.Title>
@@ -79,7 +79,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/config">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('configImage.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2">
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('configImage.jpg')` }} className="mb-2">
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Config </Card.Title>
@@ -91,7 +91,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/imports">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('imports.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2" F>
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('imports.jpg')` }} className="mb-2" F>
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Imports </Card.Title>
@@ -103,7 +103,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/uploads">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('uploads.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2">
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('uploads.jpg')` }} className="mb-2">
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Uploads </Card.Title>
@@ -115,7 +115,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/records">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('Records.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2">
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('Records.jpg')` }} className="mb-2">
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Records </Card.Title>
@@ -127,7 +127,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/plots">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('plots.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2">
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('plots.jpg')` }} className="mb-2">
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Plots </Card.Title>
@@ -139,7 +139,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/terminal">
-                            <Card bg='dark' key='Dark' text='white' style={{ width: '22rem', cursor: 'pointer', backgroundImage: `url('terminal.jpg')`, backgroundSize: 'cover', boxShadow: 'inset 0 0 100px #000' }} className="mb-2">
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('terminal.jpg')` }} className="mb-2">
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Terminal </Card.Title>
