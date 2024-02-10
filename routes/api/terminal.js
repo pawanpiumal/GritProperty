@@ -30,10 +30,10 @@ wss.on('connection', ws => {
     });
 })
 
-const commandProcessor = function(command) {
+const commandProcessor = function (command) {
     return command;
 }
 
-const outputProcessor = function(output) {
+const outputProcessor = function (output) {
     return output;
 }
