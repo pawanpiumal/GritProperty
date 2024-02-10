@@ -1,0 +1,39 @@
+module.exports = {
+    username: "XXXXXXXXXXXX",
+    password: "XXXXXXXXXXXX*",
+    host: 'XXXXXXXXXXXX',
+    db: 'XXXXXXXXXXXX',
+    port: 'XXXXXXXXXXXX',
+
+    WPusername: 'XXXXXXXXXXXX',
+    WPpassword: 'XXXXXXXXXXXX)',
+
+    WPAuthorization: "XXXXXXXXXXXX",
+
+    WPmediaURL: 'https://XXXXXXXXXXXX/wp-json/wp/v2/media',
+
+    WPmainURL: 'https://XXXXXXXXXXXX/wp-json/wp/v2/',
+
+    WPfilebirdURL: 'https://XXXXXXXXXXXX/wp-json/filebird/public/v1',
+
+    filebirdAuth: 'XXXXXXXXXXXX',
+
+    REAUN:'XXXXXXXXXXXX',
+    REAPW:'XXXXXXXXXXXX',
+
+    cliendid:'XXXXXXXXXXXX',
+    clientSecret:'XXXXXXXXXXXX',
+
+    clientAuth :'Basic XXXXXXXXXXXX',
+
+    reaTokenURL:'https://api.realestate.com.au/oauth/token',
+    reaPublishURL :'https://api.realestate.com.au/listing/v1/upload',
+
+
+    jwtSecret :"XXXXXXXXXXXX",
+    webusername:"XXXXXXXXXXXX",
+    webpassword:'XXXXXXXXXXXX',
+
+    accountExpire : '1h'
+
+}
