@@ -353,6 +353,8 @@ postProperty = async (result, type, reqStatus = "draft") => {
 
     var idArray = ['m', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'aa', 'ab', 'ac', 'ad', 'ae', 'af', 'ag', 'ah', 'ai']
 
+    var featuredImageId = 0
+
     if (resultImgArray) {
         if (Array.isArray(resultImgArray)) {
             var imagesArray = await Promise.all(resultImgArray.map(async (element, index) => {
@@ -360,11 +362,14 @@ postProperty = async (result, type, reqStatus = "draft") => {
                 return file
             }))
         } else {
-            var imagesArray = [await fileOperation(getText(resultImgArray._attributes?.url), `${getText(result.uniqueID)}-${idArray[0]}`) ]
+            var imagesArray = [await fileOperation(getText(resultImgArray._attributes?.url), `${getText(result.uniqueID)}-${idArray[0]}`)]
         }
+        featuredImageId = imagesArray[0].id
     } else {
         var imagesArray = ""
     }
+
+
 
     var statementOfInformationID = await fileOperation(getText(result.media?.attachment?._attributes?.url), `${getText(result.uniqueID)}-SOI`)
     statementOfInformationID = statementOfInformationID.id
@@ -372,10 +377,10 @@ postProperty = async (result, type, reqStatus = "draft") => {
     var resultFloorPlanArray = result.objects?.floorplan
     if (resultFloorPlanArray) {
         if (Array.isArray(resultFloorPlanArray)) {
-            var floorplans1ID = await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) 
-            var floorplans2ID = await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url), `${getText(result.uniqueID)}-Floorplan2`) 
+            var floorplans1ID = await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`)
+            var floorplans2ID = await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url), `${getText(result.uniqueID)}-Floorplan2`)
         } else {
-            var floorplans1ID = await fileOperation(getText(resultFloorPlanArray._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) 
+            var floorplans1ID = await fileOperation(getText(resultFloorPlanArray._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`)
             var floorplans2ID = ""
         }
     } else {
@@ -419,6 +424,7 @@ postProperty = async (result, type, reqStatus = "draft") => {
             "raw": getText(result.headline)
         },
         "status": reqStatus,
+        "featured_media":featuredImageId,
         "meta": {
             "mod-time": timeSplitString(result._attributes?.modTime),
             "uniqueid": getText(result.uniqueID),
