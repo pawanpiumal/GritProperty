@@ -372,10 +372,10 @@ postProperty = async (result, type, reqStatus = "draft") => {
     var resultFloorPlanArray = result.objects?.floorplan
     if (resultFloorPlanArray) {
         if (Array.isArray(resultFloorPlanArray)) {
-            var floorplans1ID = [await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) ]
-            var floorplans2ID = [await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url), `${getText(result.uniqueID)}-Floorplan2`) ]
+            var floorplans1ID = await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) 
+            var floorplans2ID = await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url), `${getText(result.uniqueID)}-Floorplan2`) 
         } else {
-            var floorplans1ID = [await fileOperation(getText(resultFloorPlanArray._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) ]
+            var floorplans1ID = await fileOperation(getText(resultFloorPlanArray._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) 
             var floorplans2ID = ""
         }
     } else {
