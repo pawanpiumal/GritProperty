@@ -157,12 +157,15 @@ const uploadFile = async (filename) => {
         }
     };
     await axios.postForm(`${config.WPmediaURL}`, form, request_config).then(res => {
-        fileid = res.data.id
+        file = {
+            id: res.data.id,
+            url: res.data.link
+        }
     }).catch(err => {
         console.error(err)
         errorSQL("ImportProperties.js - Upload Image to WP", err)
     })
-    return (fileid)
+    return (file)
 }
 
 const deleteFile = (filename) => {
@@ -200,10 +203,10 @@ const fileOperation = async (url, filename = "") => {
         await checkAvailabilityFile(filename)
         // await updateImageDatabase()
         await downloadFile(url, filename)
-        var fileId = await uploadFile(filename)
+        var file = await uploadFile(filename)
         deleteFile(filename)
         // await updateImageDatabase()
-        return fileId;
+        return file;
     } else {
         return ""
     }
@@ -353,25 +356,26 @@ postProperty = async (result, type, reqStatus = "draft") => {
     if (resultImgArray) {
         if (Array.isArray(resultImgArray)) {
             var imagesArray = await Promise.all(resultImgArray.map(async (element, index) => {
-                var id = await fileOperation(getText(element._attributes?.url), `${getText(result.uniqueID)}-${idArray[index]}`)
-                return { id }
+                var file = await fileOperation(getText(element._attributes?.url), `${getText(result.uniqueID)}-${idArray[index]}`)
+                return file
             }))
         } else {
-            var imagesArray = [{ id: await fileOperation(getText(resultImgArray._attributes?.url), `${getText(result.uniqueID)}-${idArray[0]}`) }]
+            var imagesArray = [await fileOperation(getText(resultImgArray._attributes?.url), `${getText(result.uniqueID)}-${idArray[0]}`) ]
         }
     } else {
         var imagesArray = ""
     }
 
     var statementOfInformationID = await fileOperation(getText(result.media?.attachment?._attributes?.url), `${getText(result.uniqueID)}-SOI`)
+    statementOfInformationID = statementOfInformationID.id
 
     var resultFloorPlanArray = result.objects?.floorplan
     if (resultFloorPlanArray) {
         if (Array.isArray(resultFloorPlanArray)) {
-            var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) }]
-            var floorplans2ID = [{ id: await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url), `${getText(result.uniqueID)}-Floorplan2`) }]
+            var floorplans1ID = [await fileOperation(getText(resultFloorPlanArray[0]._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) ]
+            var floorplans2ID = [await fileOperation(getText(resultFloorPlanArray[1]._attributes?.url), `${getText(result.uniqueID)}-Floorplan2`) ]
         } else {
-            var floorplans1ID = [{ id: await fileOperation(getText(resultFloorPlanArray._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) }]
+            var floorplans1ID = [await fileOperation(getText(resultFloorPlanArray._attributes?.url), `${getText(result.uniqueID)}-Floorplan1`) ]
             var floorplans2ID = ""
         }
     } else {

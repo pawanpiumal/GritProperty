@@ -137,18 +137,6 @@ class Front extends Component {
                             </Card>
                         </Link>
                     </Col>
-                    <Col>
-                        <Link to="/terminal">
-                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('terminal.jpg')` }} className="mb-2">
-                                {/* <Card.Header></Card.Header> */}
-                                <Card.Body >
-                                    <Card.Title> Terminal </Card.Title>
-                                    <Card.Text style={{ height: '8rem' }}>
-                                    </Card.Text>
-                                </Card.Body>
-                            </Card>
-                        </Link>
-                    </Col>
                 </Row>
             </Container>
         );
