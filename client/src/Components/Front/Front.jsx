@@ -79,7 +79,7 @@ class Front extends Component {
                     </Col>
                     <Col>
                         <Link to="/config">
-                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('ConfigImage.jpg')` }} className="mb-2">
+                            <Card bg='dark' key='Dark' text='white' style={{ backgroundImage: `url('configImage.jpg')` }} className="mb-2">
                                 {/* <Card.Header></Card.Header> */}
                                 <Card.Body >
                                     <Card.Title> Config </Card.Title>
